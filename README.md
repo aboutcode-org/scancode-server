@@ -8,19 +8,27 @@ Building a project which uses ScanCode as a library in a web and REST API applic
 ### Installation
 
 - Get the requirements
+
 `sudo apt-get install python-pip`
+
 `sudo pip install virtualenv`
 
 - Create a virtual environment
-  - `cd` into the directory where you want to install the virtual environment
-  `$ virtualenv .`
+
+	- `cd` into the directory where you want to install the virtual environment
+  
+  	`$ virtualenv .`
   
 - Fork and clone the scancode-server repository
-  `$ git clone https://github.com/your_username/scancode-server`
+
+	`$ git clone https://github.com/your_username/scancode-server`
 
 - Now get the django specific requirements 
-  `$ cd scancode-server`
-  `$ pip install Requirements.txt`
+ 	
+	`$ cd scancode-server`
+  
+  	`$ pip install Requirements.txt`
 
 - Now run the server 
-  `$ python manage.py runserver`
+ 	
+	`$ python manage.py runserver`
