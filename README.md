@@ -9,9 +9,9 @@ Building a project which uses ScanCode as a library in a web and REST API applic
 
 - Get the requirements
 
-`sudo apt-get install python-pip`
+`$ sudo apt-get install python-pip`
 
-`sudo pip install virtualenv`
+`$ sudo pip install virtualenv`
 
 - Create a virtual environment
 
@@ -32,3 +32,41 @@ Building a project which uses ScanCode as a library in a web and REST API applic
 - Now run the server 
  	
 	`$ python manage.py runserver`
+
+open [127.0.0.1:8000](127.0.0.1:8000) in the browser
+
+### Database setup
+
+- Create the database using these commands
+
+	`$ mysql -u root -p`
+
+- Enter your mysql password
+
+- Create a database having a name of your choice. (Let's call it DATABASE_NAME)
+
+	`> create database DATABASE_NAME;`
+
+- Exit from the mysql
+	
+	`> exit;`
+
+- Now add the information in the settings.py file
+
+	`vim scancodeServer/settings.py`
+
+- Find the dictionary DATABASES in the file and add the relevent information to it.
+
+- Apply the migrations
+
+	`python manage.py makemigrations`
+
+	`python manage.py migrate`
+
+- Create the admin
+
+	`python manage.py createsuperuser`
+
+- Add the relevant information
+
+- open [127.0.0.1:8000/admin](127.0.0.1:8000/admin)
