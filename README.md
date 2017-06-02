@@ -27,7 +27,7 @@ Building a project which uses ScanCode as a library in a web and REST API applic
  	
 	`$ cd scancode-server`
   
-  	`$ pip install Requirements.txt`
+  	`$ pip install requirements.txt`
 
 - Now run the server 
  	
