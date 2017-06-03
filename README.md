@@ -35,21 +35,46 @@ Building a project which uses ScanCode as a library in a web and REST API applic
 
 open [127.0.0.1:8000](127.0.0.1:8000) in the browser
 
-### Database setup
+### Database setup(postgresql)
 
-- Create the database using these commands
+- Install postgresql
 
-	`$ mysql -u root -p`
+	`$ sudo apt-get update`
+	`$ sudo apt-get install postgresql postgresql-contrib`
 
-- Enter your mysql password
-
-- Create a database having a name of your choice. (Let's call it DATABASE_NAME)
-
-	`> create database DATABASE_NAME;`
-
-- Exit from the mysql
+- Start postgresql server
 	
-	`> exit;`
+	`$ /etc/init.d/postgresql start`
+
+- Start postgresql shell
+	
+	`$ sudo -i -u postgres`
+
+- Create a user for scancode
+	
+	`$ createuser --interactive --pw`
+
+	Now enter the relevant information. We don't want the user to be superuser. We do want the user to create database and we don't want the user to create roles
+
+- Now create the database
+	
+	`$ create database DATABASE_NAME`
+
+- Now open up the psql interactive shell
+	
+	`$ psql`
+
+- Grant all privileges to the newly created user
+	
+	`# grant all privileges on database DATABASE_NAME to USER_NAME;`
+
+- Quit the interactivee shell
+	
+	`# \q`
+
+- Exit from postgresql shell
+	
+	`$ exit`
 
 - Now add the information in the settings.py file
 
