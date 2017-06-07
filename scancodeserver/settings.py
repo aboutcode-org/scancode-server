@@ -52,7 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'scancodeServer.urls'
+ROOT_URLCONF = 'scancodeserver.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'scancodeServer.wsgi.application'
+WSGI_APPLICATION = 'scancodeserver.wsgi.application'
 
 
 # Database
