@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 
 
 # Create your models here.
-class UserInfo(models.Model):
+class user_info(models.Model):
     def __str__(self):
         return self.user.username
 
@@ -23,21 +23,28 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 
-class file_info(models.Model):
+class AnonymousUser(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return 'guest-%s' % self.user.id
+
+
+class code_info(models.Model):
     def __str__(self):
         return self.url
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    file_url = models.CharField(max_length=3000)
-    file_number = models.IntegerField(null=True, blank=True)
-    file_size = models.IntegerField(null=True, blank=True, default=0)
+    code_url_path = models.CharField(max_length=3000)
+    code_file_number = models.IntegerField(null=True, blank=True)
+    code_file_size = models.IntegerField(null=True, blank=True, default=0)
 
 
 class scanned_results(models.Model):
     def __str__(self):
         return self.total_errors
 
-    file_info = models.ForeignKey(file_info)
+    file_info = models.ForeignKey(code_info)
     scanned_json_result = JSONField()
     scanned_html_result = models.CharField()
     scanned_files = models.IntegerField(null=True, blank=True, default=0)
@@ -46,8 +53,25 @@ class scanned_results(models.Model):
     scan_info = models.CharField(max_length=3000)
 
 
-class AnonymousUser(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
+class license(models.Model):
     def __str__(self):
-        return 'guest-%s' % self.user.id
+        return self.license
+
+    result_info = models.ForeignKey(scanned_results)
+    license = models.CharField(max_length=1000)
+
+
+class copyright(models.Model):
+    def __str__(self):
+        return self.copyright
+
+    result_info = models.ForeignKey(scanned_results)
+    copyright = models.CharField(max_length=1000)
+
+
+class package(models.Model):
+    def __str__(self):
+        return self.package
+
+    result_info = models.ForeignKey(scanned_results)
+    package = models.CharField(max_length=1000)
