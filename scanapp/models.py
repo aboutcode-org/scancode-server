@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
-from django.db import models
-from rest_framework.authtoken.models import Token
-from django.conf import settings
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.contrib.postgres.fields import JSONField
 
-from django.utils import timezone
+from django.conf import settings
+from django.contrib.postgres.fields import JSONField
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
 
 # Create your models here.
 class UserInfo(models.Model):
@@ -46,6 +46,8 @@ class scanned_results(models.Model):
     scan_info = models.CharField(max_length=3000)
 
 
+class AnonymousUser(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-
-
+    def __str__(self):
+        return 'guest-%s' % self.user.id
