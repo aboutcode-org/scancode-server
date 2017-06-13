@@ -46,7 +46,7 @@ class scanned_results(models.Model):
 
     code_info = models.ForeignKey(code_info)
     scanned_json_result = JSONField()
-    scanned_html_result = models.CharField()
+    scanned_html_result = models.CharField(max_length=10000)
     scanned_files = models.IntegerField(null=True, blank=True, default=0)
     total_errors = models.IntegerField(null=True, blank=True, default=0)
     scan_time = models.IntegerField(null=True, blank=True, default=0)
