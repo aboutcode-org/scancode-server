@@ -44,7 +44,7 @@ class scanned_results(models.Model):
     def __str__(self):
         return self.total_errors
 
-    file_info = models.ForeignKey(code_info)
+    code_info = models.ForeignKey(code_info)
     scanned_json_result = JSONField()
     scanned_html_result = models.CharField()
     scanned_files = models.IntegerField(null=True, blank=True, default=0)
