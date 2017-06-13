@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 
 
 # Create your models here.
-class user_info(models.Model):
+class UserInfo(models.Model):
     def __str__(self):
         return self.user.username
 
@@ -30,7 +30,7 @@ class AnonymousUser(models.Model):
         return 'guest-%s' % self.user.id
 
 
-class code_info(models.Model):
+class CodeInfo(models.Model):
     def __str__(self):
         return self.url
 
@@ -40,11 +40,11 @@ class code_info(models.Model):
     code_file_size = models.IntegerField(null=True, blank=True, default=0)
 
 
-class scanned_results(models.Model):
+class ScannedResults(models.Model):
     def __str__(self):
         return self.total_errors
 
-    code_info = models.ForeignKey(code_info)
+    code_info = models.ForeignKey(CodeInfo)
     scanned_json_result = JSONField()
     scanned_html_result = models.CharField(max_length=10000)
     scanned_files = models.IntegerField(null=True, blank=True, default=0)
@@ -53,25 +53,25 @@ class scanned_results(models.Model):
     scan_info = models.CharField(max_length=3000)
 
 
-class license(models.Model):
+class License(models.Model):
     def __str__(self):
         return self.license
 
-    result_info = models.ForeignKey(scanned_results)
+    result_info = models.ForeignKey(ScannedResults)
     license = models.CharField(max_length=1000)
 
 
-class copyright(models.Model):
+class Copyright(models.Model):
     def __str__(self):
         return self.copyright
 
-    result_info = models.ForeignKey(scanned_results)
+    result_info = models.ForeignKey(ScannedResults)
     copyright = models.CharField(max_length=1000)
 
 
-class package(models.Model):
+class Package(models.Model):
     def __str__(self):
         return self.package
 
-    result_info = models.ForeignKey(scanned_results)
+    result_info = models.ForeignKey(ScannedResults)
     package = models.CharField(max_length=1000)
