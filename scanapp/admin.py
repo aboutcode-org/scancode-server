@@ -1,9 +1,20 @@
 from django.contrib import admin
 
-from .models import UserInfo, AnonymousUser, CodeInfo, ScanError, Copyright, License, Package, ScanInfo, URLScanInfo, \
-    LocalScanInfo, ScanResult, ScanFileInfo
+# Import models from scanapp.models
+from .models import UserInfo
+from .models import AnonymousUser
+from .models import CodeInfo
+from .models import ScanError
+from .models import Copyright
+from .models import License
+from .models import Package
+from .models import ScanInfo
+from .models import URLScanInfo
+from .models import LocalScanInfo
+from .models import ScanResult
+from .models import ScanFileInfo
 
-# Register your models here.
+# Register models from scancode.models
 admin.site.register(UserInfo)
 admin.site.register(AnonymousUser)
 admin.site.register(CodeInfo)
