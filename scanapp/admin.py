@@ -1,12 +1,18 @@
 from django.contrib import admin
 
-from .models import user_info, AnonymousUser, code_info, scanned_results, copyright, license, package
+from .models import UserInfo, AnonymousUser, CodeInfo, ScanError, Copyright, License, Package, ScanInfo, URLScanInfo, \
+    LocalScanInfo, ScanResult, ScanFileInfo
 
 # Register your models here.
-admin.site.register(user_info)
+admin.site.register(UserInfo)
 admin.site.register(AnonymousUser)
-admin.site.register(code_info)
-admin.site.register(scanned_results)
-admin.site.register(copyright)
-admin.site.register(license)
-admin.site.register(package)
+admin.site.register(CodeInfo)
+admin.site.register(ScanError)
+admin.site.register(Copyright)
+admin.site.register(License)
+admin.site.register(Package)
+admin.site.register(ScanInfo)
+admin.site.register(URLScanInfo)
+admin.site.register(LocalScanInfo)
+admin.site.register(ScanFileInfo)
+admin.site.register(ScanResult)
