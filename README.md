@@ -1,5 +1,7 @@
 # scancode-server
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/59da2f264a5947209f05303cfbe8a223)](https://www.codacy.com/app/RajuKoushik/scancode-server?utm_source=github.com&utm_medium=referral&utm_content=nexB/scancode-server&utm_campaign=badger)
+
 
 *An Overview :* 
 
