@@ -45,13 +45,16 @@ class LocalUploadView(FormView):
                 # store the files on the server
                 fs = FileSystemStorage()
                 filename = fs.save(f.name, f)
+                
+                # call the scan function to scan the file recieved
                 scan_code = ScanCode()
-                json = scan_code.apply_scan('media/'+str(f.name))
-                f = '<h1>' + str(json) + '</h1>'
-                return f
+                result = scan_code.apply_scan('media/'+str(f.name))
 
-
+                # Handle the data received
+                return result
+                    
+            handle_data = handle_upload_files(request.FILES['upload_from_local'])
             # files will be uploaded 
             # use following functions to handle
-            return HttpResponse(handle_upload_files(request.FILES['upload_from_local']))
+            return HttpResponse(handle_data)
 
