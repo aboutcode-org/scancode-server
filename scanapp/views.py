@@ -20,15 +20,21 @@ from django.http import HttpResponse
 class URLFormView(FormView):
     template_name = 'scanapp/urlscan.html'
     form_class = URLScanForm
-    success_url = '/thanks/'
+    # success_url = '/thanks/'
     
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         
         if form.is_valid():
-            # get the code into the file system
-            # run the scan
-            pass
+            # get the URL from the form
+            URL = request.POST['URL']
+
+            # create the object so scan can be applied
+            scan_code = ScanCode()
+            result = scan_code.get_content(URL)
+            
+            # return the response as HttpResponse
+            return HttpResponse(result)
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
