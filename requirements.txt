@@ -2,3 +2,5 @@ django==1.11.1
 psycopg2==2.7.1
 djangorestframework==3.6.3
 scancode-toolkit==2.0.0rc3
+celery
+

@@ -1,8 +1,11 @@
-import scancode
+from __future__ import absolute_import, unicode_literals
+
 import json
-import subprocess
-import requests
 import os
+import subprocess
+
+import requests
+
 
 class ScanCode(object):
     def __init__(self):
@@ -18,7 +21,7 @@ class ScanCode(object):
         # list to store all the file names in the directory
         dir_list = list()
         dir_list = os.listdir('media/URL/')
-        
+
         # name of file where the content will be stored
         file_name = ''
         if len(dir_list) == 0:
@@ -30,7 +33,7 @@ class ScanCode(object):
         # send the request to get the URL
         r = requests.get(URL)
         path = 'media/URL/' + file_name
-        
+
         if r.status_code == 200:
             # open the file in write mode
             output_file = open(path, 'w')
@@ -38,12 +41,10 @@ class ScanCode(object):
             # write the content into the file
             # This doesn't works without encoding part
             output_file.write(r.text.encode('utf-8'))
-            
+
             # pass the path to apply_scan function
-           
+
             return self.apply_scan(path)
-            
-        else: 
+
+        else:
             return 'Some error has occured'
-            
-        
