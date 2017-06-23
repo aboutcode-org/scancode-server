@@ -125,3 +125,11 @@ class ScanError(models.Model):
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
     scan_error = models.CharField(max_length=1000)
+
+class CeleryScan(models.Model):
+    scan_id = models.AutoField(primary_key = True)
+    scan_results = models.CharField(max_length = 20000, null=True, blank=True)
+    is_complete = models.BooleanField(default = False)
+
+    def __str__(self):
+        return str(self.scan_id)
