@@ -33,14 +33,13 @@ class AnonymousUser(models.Model):
 class ScanInfo(models.Model):
     def __str__(self):
         return self.scan_type
-    
+
     # types of scans that can be applied
     scan_types = (
         ('URL', 'URL'),
         ('Local Scan', 'localscan'),
     )
-    
-    
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     scan_type = models.CharField(max_length=20, choices=scan_types, default='URL')
 
@@ -94,11 +93,12 @@ class ScanFileInfo(models.Model):
     scan_result = models.ForeignKey(ScanResult)
     file_path = models.CharField(max_length=400)
 
+
 # Multiple or no result for each file
 class License(models.Model):
     def __str__(self):
         return self.license
-    
+
     scan_file_info = models.ForeignKey(ScanFileInfo)
     license = models.CharField(max_length=1000)
 
@@ -106,7 +106,7 @@ class License(models.Model):
 class Copyright(models.Model):
     def __str__(self):
         return self.copyright
-    
+
     scan_file_info = models.ForeignKey(ScanFileInfo)
     copyright = models.CharField(max_length=1000)
 
@@ -114,7 +114,7 @@ class Copyright(models.Model):
 class Package(models.Model):
     def __str__(self):
         return self.package
-    
+
     scan_file_info = models.ForeignKey(ScanFileInfo)
     package = models.CharField(max_length=1000)
 
@@ -122,6 +122,6 @@ class Package(models.Model):
 class ScanError(models.Model):
     def __str__(self):
         return self.scan_error
-    
+
     scan_file_info = models.ForeignKey(ScanFileInfo)
     scan_error = models.CharField(max_length=1000)
