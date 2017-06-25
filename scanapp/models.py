@@ -9,25 +9,10 @@ from rest_framework.authtoken.models import Token
 
 
 # Create your models here.
-class UserInfo(models.Model):
-    def __str__(self):
-        return self.user.username
-
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    age = models.PositiveIntegerField(default=0)
-
-
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-
-
-class AnonymousUser(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return 'guest-%s' % self.user.id
 
 
 class ScanInfo(models.Model):
@@ -40,8 +25,15 @@ class ScanInfo(models.Model):
         ('Local Scan', 'localscan'),
     )
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     scan_type = models.CharField(max_length=20, choices=scan_types, default='URL')
+
+
+class UserInfo(models.Model):
+    def __str__(self):
+        return self.user.username
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    scan_info = models.ForiegnKey(ScanInfo)
 
 
 class URLScanInfo(models.Model):
