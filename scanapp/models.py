@@ -33,7 +33,7 @@ class UserInfo(models.Model):
         return self.user.username
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    scan_info = models.ForiegnKey(ScanInfo)
+    scan_info = models.ForeignKey(ScanInfo)
 
 
 class URLScanInfo(models.Model):

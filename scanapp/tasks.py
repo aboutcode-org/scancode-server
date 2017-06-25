@@ -7,62 +7,7 @@ import requests
 
 from scanapp.models import CeleryScan
 
-from celery import Task
-
 from scanapp.celery import app
-
-class ScanCodeTask(Task):
-    ignore_result = True
-    name = 'scancode'
-    def __init__(self, *args, **kwargs):
-        self.URL = kwargs.get('URL', None)
-        self.scan_id = kwargs.get('scan_id', None)
-
-    def run(self, source, *args, **kwargs):
-        self.get_content(URL, scan_id)
-
-    def apply_scan(self, path, scan_id):
-        scan_result = subprocess.check_output(['scancode', path])
-        json_data = json.loads(scan_result)
-        json_data = json.dumps(json_data)
-
-        celery_scan = CeleryScan.objects.get(scan_id=scan_id)
-        celery_scan.scan_results = str(json_data)
-        celery_scan.is_complete = True
-        celery_scan.save()
-
-    def get_content(self, URL, scan_id):
-        # list to store all the file names in the directoryk
-        dir_list = list()
-        dir_list = os.listdir('media/URL/')
-
-        # name of file where the content will be stored
-        file_name = ''
-        if len(dir_list) == 0:
-            file_name = '1'
-        else:
-            dir_list.sort()
-            file_name = str(1 + int(dir_list[-1]))
-
-        # send the request to get the URL
-        r = requests.get(URL)
-        path = 'media/URL/' + file_name
-
-        if r.status_code == 200:
-            # open the file in write mode
-            output_file = open(path, 'w')
-
-            # write the content into the file
-            # This doesn't works without encoding part
-            output_file.write(r.text.encode('utf-8'))
-
-            # pass the path to apply_scan function
-
-            return self.apply_scan(path)
-
-        else:
-            return 'Some error has occured'
-
 
 @app.task
 def scan_code_async(URL, scan_id):
