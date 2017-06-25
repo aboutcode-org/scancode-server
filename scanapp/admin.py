@@ -2,7 +2,6 @@ from django.contrib import admin
 
 # Import models from scanapp.models
 from .models import UserInfo
-from .models import AnonymousUser
 from .models import CodeInfo
 from .models import ScanError
 from .models import Copyright
@@ -16,7 +15,6 @@ from .models import ScanFileInfo
 
 # Register models from scancode.models
 admin.site.register(UserInfo)
-admin.site.register(AnonymousUser)
 admin.site.register(CodeInfo)
 admin.site.register(ScanError)
 admin.site.register(Copyright)
