@@ -109,18 +109,69 @@ class ScanFileInfo(models.Model):
 # Multiple or no result for each file
 class License(models.Model):
     def __str__(self):
-        return self.license
+        return self.key
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
-    license = models.CharField(max_length=1000)
+    category = models.CharField(max_length=1000)
+    start_line = models.IntegerField()
+    spdx_url = models.URLField(max_length=2000)
+    text_url = models.URLField(max_length=2000)
+    spdx_license_key = models.CharField(max_length=200)
+    homepage_url = models.URLField(max_length=2000)
+    score = models.IntegerField()
+    end_line = models.IntegerField()
+    key = models.CharField(max_length=200)
+    owner = models.CharField(max_length=500)
+    dejacode_url = models.URLField(max_length=2000)
 
+
+class MatchedRule(models.Model):
+    def __str__(self):
+        return self.license_choice
+
+    license = models.ForeignKey(License)
+    license_choice = models.BooleanField()
+    identifier = models.CharField(max_length=200)
+
+
+class MatchedRuleLicenses(models.Model):
+    def __str__(self):
+        return self.license
+
+    matched_rule = models.ForeignKey(MatchedRule)
+    license = models.CharField(max_length=200)
 
 class Copyright(models.Model):
     def __str__(self):
-        return self.copyright
+        return self.start_line
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
-    copyright = models.CharField(max_length=1000)
+    start_line = models.IntegerField()
+    end_line = models.IntegerField()
+
+
+class CopyrightHolders(models.Model):
+    def __str__(self):
+        return self.holder
+
+    copyright = models.ForeignKey(Copyright)
+    holder = models.CharField(max_length=400)
+
+
+class CopyrightStatements(models.Model):
+    def __str__(self):
+        return self.statement
+
+    copyright = models.ForeignKey(Copyright)
+    statement = models.CharField(max_length=500)
+
+
+class CopyrightAuthor(models.Model):
+    def __str__(self):
+        return self.author
+
+    copyright = models.ForeignKey(Copyright)
+    author = models.CharField(max_length=200)
 
 
 class Package(models.Model):
