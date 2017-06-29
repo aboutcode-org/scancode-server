@@ -48,7 +48,7 @@ class ScanInfo(models.Model):
     )
 
     scan_type = models.CharField(max_length=20, choices=scan_types, default='URL')
-
+    is_complete = models.BooleanField()
 
 class UserInfo(models.Model):
     def __str__(self):
