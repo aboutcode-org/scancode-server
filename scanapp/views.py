@@ -53,14 +53,14 @@ class LocalUploadView(FormView):
             f = request.FILES['upload_from_local']
             fs = FileSystemStorage('media/AnonymousUser/')
             filename = fs.save(f.name, f)
-            
+
             scan_type = 'localscan'
 
             # Create an Instance of InsertIntoDB
             insert_into_db = InsertIntoDB()
 
             # call the create_scan_id function
-            scan_id = insert_into_db.create_scan_id(scan_type=scan_type)
+            scan_id = insert_into_db.create_scan_id(scan_type)
 
             # different paths for both anonymous and registered users
             if(str(request.user) == 'AnonymousUser'):
@@ -69,8 +69,8 @@ class LocalUploadView(FormView):
             else:
                 path = 'media/user/' + str(request.user) + '/' + str(filename)
             # call the celery function to apply the scan
-            apply_scan_async.delay(path, scan_id, scan_type=scan_type)
- 
+            apply_scan_async.delay(path, scan_id, scan_type)
+
             # return the response as HttpResponse
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
