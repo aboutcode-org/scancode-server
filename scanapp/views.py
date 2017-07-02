@@ -68,8 +68,10 @@ class LocalUploadView(FormView):
 
             else:
                 path = 'media/user/' + str(request.user) + '/' + str(filename)
+            folder_name = filename,
+            URL = None
             # call the celery function to apply the scan
-            apply_scan_async.delay(path, scan_id, scan_type)
+            apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
 
             # return the response as HttpResponse
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
@@ -86,13 +88,22 @@ class URLFormViewCelery(FormView):
             # get the URL from the form
             URL = request.POST['URL']
 
-            celery_scan = CeleryScan(scan_results='', is_complete=False)
-            celery_scan.save()
+            scan_type = 'URL'
 
-            scan_id = celery_scan.scan_id
-            # create the object so scan can be applied
-            result = scan_code_async.delay(URL, scan_id)
+            # Create an Instance of InsertIntoDB
+            insert_into_db = InsertIntoDB()
 
+            # call the create_scan_id function
+            scan_id = insert_into_db.create_scan_id(scan_type)
+
+            # different paths for both anonymous and registered users
+            if(str(request.user) == 'AnonymousUser'):
+                path = 'media/AnonymousUser/URL/'
+
+            else:
+                path = 'media/user/' + str(request.user) + '/URL/'
+
+            scan_code_async.delay(URL, scan_id, path)
             # return the response as HttpResponse
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 

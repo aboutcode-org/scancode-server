@@ -49,9 +49,11 @@ from scanapp.models import ScanError
 from scanapp.celery import app
 
 @app.task
-def scan_code_async(URL, scan_id):
+def scan_code_async(URL, scan_id, path):
+    # return the scan_id
+    scan_type = 'URL'
     dir_list = list()
-    dir_list = os.listdir('media/URL/')
+    dir_list = os.listdir(path)
 
     # name of file where the content will be stored
     file_name = ''
@@ -63,7 +65,7 @@ def scan_code_async(URL, scan_id):
 
     # send the request to get the URL
     r = requests.get(URL)
-    path = 'media/URL/' + file_name
+    path = path + file_name
 
     if r.status_code == 200:
         # open the file in write mode
@@ -74,25 +76,26 @@ def scan_code_async(URL, scan_id):
         output_file.write(r.text.encode('utf-8'))
 
         # pass the path to apply_scan function
-
-        return apply_scan_async.delay(path, scan_id)
-
-    else:
-        return 'Some error has occured'
+        folder_name = None
+        apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
 
 @app.task
-def apply_scan_async(path, scan_id, scan_type):
+def apply_scan_async(path, scan_id, scan_type, URL, folder_name):
     """
-    Run a scancode scan on the files at `path` for `scan_id` and `scan_type`
+    Run a scancode scan on the files at `path` for `scan_id`, `scan_type`, `URL`, `folder_name`
     and save results in the database.
     """
     # FIXME improve error checking when calling scan in subprocess.
     scan_result = subprocess.check_output(['scancode', path])
     json_data = json.loads(scan_result)
-    save_results_to_db.delay(scan_id, json_data, scan_type)
+    save_results_to_db.delay(scan_id, json_data, scan_type, URL, folder_name)
 
 @app.task
-def save_results_to_db(scan_id, json_data, scan_type):
+def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
+    """
+    Fill database using `json_data`, `scan_type`, `URL`, `folder_name` for given `scan_id`
+    and change `is_complete` to true.
+    """
     insert_into_db = InsertIntoDB()
     scan_info = ScanInfo.objects.get(pk=scan_id)
     code_info = insert_into_db.insert_code_info(
@@ -105,14 +108,14 @@ def save_results_to_db(scan_id, json_data, scan_type):
         insert_into_db.insert_into_url_scan_info(
             scan_info = scan_info,
             # FIXME get the URL from the filled form
-            URL='https://github.com'
+            URL = URL
         )
 
     elif(scan_type == 'localscan'):
         insert_into_db.insert_into_local_scan_info(
             scan_info = scan_info,
             # FIXME get the foldername from the filled form
-            folder_name = 'something/'
+            folder_name = folder_name
         )
 
     # calculate total scan errors
@@ -206,7 +209,6 @@ def save_results_to_db(scan_id, json_data, scan_type):
                 scan_error = a_scan_error
             )
 
-    # Finally change the is_complete variable to True
     scan_info.is_complete = True
     scan_info.save()
 
@@ -215,16 +217,13 @@ class InsertIntoDB(object):
         pass
 
     def create_scan_id(self, scan_type):
-        # create an object of ScanInfo
+        """
+        Create the `scan_id` for an applied scan using `scan_type`
+        and returns the `scan_id`.
+        """
         scan_info = ScanInfo(scan_type=scan_type, is_complete=False)
-
-        # save the instance to the database
         scan_info.save()
-
-        # get the scan_id from the instance
         scan_id = scan_info.id
-
-        # return the scan_id
         return scan_id
 
     def insert_code_info(self, scan_info, total_code_files, code_size):
