@@ -22,17 +22,21 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 from django.conf.urls import url
-
+from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
-# import views from scanapp/views.py
 from scanapp.views import LocalUploadView
-from scanapp.views import URLFormViewCelery
 from scanapp.views import ScanResults
+from scanapp.views import URLFormViewCelery
+from . import views
 
 urlpatterns = [
+
     url(r'^index/', TemplateView.as_view(template_name="scanapp/index.html")),
     url(r'^localscan/', LocalUploadView.as_view(), name='localuploadview'),
     url(r'^urlscan/', URLFormViewCelery.as_view(), name='urlceleryformview'),
     url(r'^resultscan/(?P<pk>[0-9]+)', ScanResults.as_view(), name='resultview'),
+    url(r'^login/', views.login, name='login'),
+    url(r'^signin/$', auth_views.login, name='signin'),
+
 ]
