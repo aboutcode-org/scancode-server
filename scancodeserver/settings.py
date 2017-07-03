@@ -117,9 +117,9 @@ WSGI_APPLICATION = 'scancodeserver.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'taskbuster_db',
-        'USER': 'rajukoushik',
-        'PASSWORD': 'Rajukeka5',
+        'NAME': 'DATABASE_NAME',
+        'USER': 'DATABASE_USER',
+        'PASSWORD': 'USER_PASSWORD',
         'HOST': 'localhost',
         'PORT': '',
 
