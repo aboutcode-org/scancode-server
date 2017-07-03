@@ -24,6 +24,7 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -90,6 +91,8 @@ class ScanResult(models.Model):
         return self.total_errors
 
     code_info = models.ForeignKey(CodeInfo)
+    scanned_json_result = JSONField()
+    scanned_html_result = models.CharField(max_length=10000)
     scancode_notice = models.CharField(max_length=2000)
     scancode_version = models.CharField(max_length=200)
     files_count = models.IntegerField(null=True, blank=True, default=0)
@@ -189,10 +192,11 @@ class ScanError(models.Model):
     scan_file_info = models.ForeignKey(ScanFileInfo)
     scan_error = models.CharField(max_length=1000)
 
+
 class CeleryScan(models.Model):
-    scan_id = models.AutoField(primary_key = True)
-    scan_results = models.CharField(max_length = 20000, null=True, blank=True)
-    is_complete = models.BooleanField(default = False)
+    scan_id = models.AutoField(primary_key=True)
+    scan_results = models.CharField(max_length=20000, null=True, blank=True)
+    is_complete = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.scan_id)

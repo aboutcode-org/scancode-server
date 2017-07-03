@@ -23,24 +23,20 @@
 
 # To store the files on the server we use this import
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
-from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import URLScanForm
-
-from scanapp.tasks import scan_code_async
-from scanapp.tasks import apply_scan_async
-from scanapp.tasks import InsertIntoDB
-
-from scanapp.models import CeleryScan
-from scanapp.models import ScanInfo
 from scanapp.models import CodeInfo
+from scanapp.models import ScanInfo
 from scanapp.models import ScanResult
+from scanapp.tasks import InsertIntoDB
+from scanapp.tasks import apply_scan_async
+from scanapp.tasks import scan_code_async
+
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -63,7 +59,7 @@ class LocalUploadView(FormView):
             scan_id = insert_into_db.create_scan_id(scan_type)
 
             # different paths for both anonymous and registered users
-            if(str(request.user) == 'AnonymousUser'):
+            if (str(request.user) == 'AnonymousUser'):
                 path = 'media/AnonymousUser/' + str(filename)
 
             else:
@@ -97,7 +93,7 @@ class URLFormViewCelery(FormView):
             scan_id = insert_into_db.create_scan_id(scan_type)
 
             # different paths for both anonymous and registered users
-            if(str(request.user) == 'AnonymousUser'):
+            if (str(request.user) == 'AnonymousUser'):
                 path = 'media/AnonymousUser/URL/'
 
             else:
@@ -107,10 +103,12 @@ class URLFormViewCelery(FormView):
             # return the response as HttpResponse
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
+
 class ScanResults(TemplateView):
     template_name = 'scanapp/scanresult.html'
+
     def get(self, request, *args, **kwargs):
-        #celery_scan = CeleryScan.objects.get(scan_id=kwargs['pk'])
+        # celery_scan = CeleryScan.objects.get(scan_id=kwargs['pk'])
         scan_info = ScanInfo.objects.get(pk=kwargs['pk'])
         result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
         if scan_info.is_complete == True:
@@ -118,4 +116,8 @@ class ScanResults(TemplateView):
             scan_result = ScanResult.objects.get(code_info=code_info)
             result = scan_result.scanned_json_result
 
-        return render(request, 'scanapp/scanresults.html', context = {'result': result})
+        return render(request, 'scanapp/scanresults.html', context={'result': result})
+
+
+def login(request):
+    return render(request, 'scanapp/login.html')
