@@ -43,6 +43,7 @@ from django.http import HttpResponse
 import json
 from django.db import transaction
 from django.contrib.auth.models import User
+from django.views import View
 
 
 class LocalUploadView(FormView):
@@ -126,31 +127,31 @@ class ScanResults(TemplateView):
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
 
-def login(request):
-    return render(request, 'scanapp/login.html')
+class LoginView(TemplateView):
+    template_name = "scanapp/login.html"
 
 
-@csrf_exempt
-def post_sign_up(request):
-    if request.POST.get('password') != request.POST.get('confirm-password'):
-        return HttpResponse("Unauthorized- Password doesn't match", status=401)
+class RegisterView(View):
+    def post(self, request):
+        if request.POST.get('password') != request.POST.get('confirm-password'):
+            return HttpResponse("Unauthorized- Password doesn't match", status=401)
 
-    with transaction.atomic():
-        user = User.objects.create_user(
-            username=request.POST.get('username'),
-            password=request.POST.get('password'),
-            email=request.POST.get('email')
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=request.POST.get('username'),
+                password=request.POST.get('password'),
+                email=request.POST.get('email')
+            )
+            # user.save()
+
+            # user.first_name = request.POST.get('first_name', '')
+            # user.last_name = request.POST.get('last_name', '')
+            user.save()
+
+        return HttpResponse(
+            json.dumps(
+                {
+                    'token': Token.objects.get(user=user).key
+                }
+            )
         )
-        # user.save()
-
-        # user.first_name = request.POST.get('first_name', '')
-        # user.last_name = request.POST.get('last_name', '')
-        user.save()
-
-    return HttpResponse(
-        json.dumps(
-            {
-                'token': Token.objects.get(user=user).key
-            }
-        )
-    )
