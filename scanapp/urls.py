@@ -28,6 +28,7 @@ from django.views.generic import TemplateView
 from scanapp.views import LocalUploadView
 from scanapp.views import ScanResults
 from scanapp.views import URLFormViewCelery
+from rest_framework.authtoken import views as rest_views
 from . import views
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
     url(r'^urlscan/', URLFormViewCelery.as_view(), name='urlceleryformview'),
     url(r'^resultscan/(?P<pk>[0-9]+)', ScanResults.as_view(), name='resultview'),
     url(r'^login/', views.login, name='login'),
-    url(r'^signin/$', auth_views.login, name='signin'),
+    url(r'^signin/', rest_views.obtain_auth_token,name='signin'),
+    url(r'^signup/?', views.post_sign_up, name='signup'),
 
 ]
