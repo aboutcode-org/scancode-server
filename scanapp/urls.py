@@ -28,9 +28,11 @@ from django.views.generic import TemplateView
 from scanapp.views import LocalUploadView
 from scanapp.views import ScanResults
 from scanapp.views import URLFormViewCelery
+
 from rest_framework.authtoken import views as rest_views
 from scanapp.views import RegisterView
 from scanapp.views import LoginView
+
 from . import views
 
 urlpatterns = [

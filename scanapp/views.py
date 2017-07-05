@@ -36,6 +36,7 @@ from scanapp.models import ScanResult
 from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
+
 from django.views.decorators.csrf import csrf_exempt
 from . import models
 from rest_framework.authtoken.models import Token
@@ -44,7 +45,6 @@ import json
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
-
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -125,7 +125,6 @@ class ScanResults(TemplateView):
             result = scan_result.scanned_json_result
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
-
 
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
