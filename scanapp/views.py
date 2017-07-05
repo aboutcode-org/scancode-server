@@ -142,10 +142,7 @@ class RegisterView(View):
                 password=request.POST.get('password'),
                 email=request.POST.get('email')
             )
-            # user.save()
 
-            # user.first_name = request.POST.get('first_name', '')
-            # user.last_name = request.POST.get('last_name', '')
             user.save()
 
         return HttpResponse(
