@@ -50,12 +50,14 @@ from scanapp.celery import app
 
 @app.task
 def scan_code_async(URL, scan_id, path):
-    # return the scan_id
+    """
+    Create and save a file at `path` present at `URL` using `scan_id` and bare `path`
+    and apply the scan.
+    """
     scan_type = 'URL'
     dir_list = list()
     dir_list = os.listdir(path)
 
-    # name of file where the content will be stored
     file_name = ''
     if len(dir_list) == 0:
         file_name = '1'
@@ -63,19 +65,12 @@ def scan_code_async(URL, scan_id, path):
         dir_list.sort()
         file_name = str(1 + int(dir_list[-1]))
 
-    # send the request to get the URL
     r = requests.get(URL)
     path = path + file_name
 
     if r.status_code == 200:
-        # open the file in write mode
         output_file = open(path, 'w')
-
-        # write the content into the file
-        # This doesn't works without encoding part
         output_file.write(r.text.encode('utf-8'))
-
-        # pass the path to apply_scan function
         folder_name = None
         apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
 
@@ -98,7 +93,7 @@ def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
     """
     insert_into_db = InsertIntoDB()
     scan_info = ScanInfo.objects.get(pk=scan_id)
-    code_info = insert_into_db.insert_code_info(
+    code_info = insert_into_db.insert_into_code_info(
         scan_info = scan_info,
         total_code_files = json_data['files_count'],
         code_size = 4096,
@@ -124,7 +119,7 @@ def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
         for error in a_file['scan_errors']:
             total_errors = total_errors + 1
 
-    scan_result = insert_into_db.save_results(
+    scan_result = insert_into_db.insert_into_save_results(
         code_info = code_info,
         scanned_json_result = json_data,
         scanned_html_result = '<h4>' + str(json.dumps(json_data)) + '</h4>',
@@ -137,13 +132,13 @@ def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
 
     # create scan_file_info for every new file path that comes our way
     for a_file in json_data['files']:
-        scan_file_info = insert_into_db.scan_file_info(
+        scan_file_info = insert_into_db.insert_into_scan_file_info(
             scan_result = scan_result,
             file_path = a_file['path']
         )
 
         for a_license in a_file['licenses']:
-            license = insert_into_db.add_license(
+            license = insert_into_db.insert_into_license(
                 scan_file_info = scan_file_info,
                 category = a_license['category'],
                 start_line = a_license['start_line'],
@@ -159,7 +154,7 @@ def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
             )
 
             a_matched_rule = a_license['matched_rule']
-            matched_rule = insert_into_db.matched_rule(
+            matched_rule = insert_into_db.insert_into_matched_rule(
                 license = license,
                 license_choice = a_matched_rule['license_choice'],
                 identifier = a_matched_rule['identifier']
@@ -167,44 +162,44 @@ def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
 
             matched_rule_licenses = a_matched_rule['licenses']
             for a_matched_rule_license in matched_rule_licenses:
-                insert_into_db.matched_rule_licenses(
+                insert_into_db.insert_into_matched_rule_licenses(
                     matched_rule = matched_rule,
                     a_license = a_matched_rule_license
                 )
 
         for a_copyright in a_file['copyrights']:
-            copyright = insert_into_db.add_copyright(
+            copyright = insert_into_db.insert_into_copyright(
                 scan_file_info = scan_file_info,
                 start_line = a_copyright['start_line'],
                 end_line = a_copyright['end_line']
             )
 
             for copyright_holder in a_copyright['holders']:
-                insert_into_db.copyright_holder(
+                insert_into_db.insert_into_copyright_holders(
                     copyright = copyright,
                     holder = copyright_holder
                 )
 
             for copyright_statement in a_copyright['statements']:
-                insert_into_db.copyright_statements(
+                insert_into_db.insert_into_copyright_statements(
                     copyright = copyright,
                     statement = copyright_statement
                 )
 
             for copyright_author in a_copyright['authors']:
-                insert_into_db.copyright_author(
+                insert_into_db.insert_into_copyright_author(
                     copyright = copyright,
                     author = copyright_author
                 )
 
         for a_package in a_file['packages']:
-            insert_into_db.add_package(
+            insert_into_db.insert_into_package(
                 scan_file_info = scan_file_info,
                 package = a_package
             )
 
         for a_scan_error in a_file['scan_errors']:
-            insert_into_db.add_scan_error(
+            insert_into_db.insert_into_scan_error(
                 scan_file_info = scan_file_info,
                 scan_error = a_scan_error
             )
@@ -226,7 +221,11 @@ class InsertIntoDB(object):
         scan_id = scan_info.id
         return scan_id
 
-    def insert_code_info(self, scan_info, total_code_files, code_size):
+    def insert_into_code_info(self, scan_info, total_code_files, code_size):
+        """
+        Add `total_code_files` and `code_size` into model `CodeInfo` using `scan_info`
+        and return `code_info`
+        """
         code_info = CodeInfo(
             scan_info = scan_info,
             total_code_files = total_code_files,
@@ -237,14 +236,24 @@ class InsertIntoDB(object):
         return code_info
 
     def insert_into_url_scan_info(self, scan_info, URL):
+        """
+        Add `URL` into `URLScanInfo` using `scan_info`
+        """
         URL_scan_info = URLScanInfo(scan_info=scan_info, URL=URL)
         URL_scan_info.save()
 
     def insert_into_local_scan_info(self, scan_info, folder_name):
+        """
+        Add `folder_name` into `LocalScanInfo` using `scan_info`
+        """
         local_scan_info = LocalScanInfo(scan_info=scan_info, folder_name=folder_name)
         local_scan_info.save()
 
-    def save_results(self, code_info, scanned_json_result, scanned_html_result, scancode_notice, scancode_version, files_count, total_errors, scan_time):
+    def insert_into_save_results(self, code_info, scanned_json_result, scanned_html_result, scancode_notice, scancode_version, files_count, total_errors, scan_time):
+        """
+        Add `scanned_json_result`, `scanned_html_result`, `scancode_notice`, `scancode_version`, `files_count`, `total_errors`, `scan_time` into `ScanResult` using `code_info`
+        and return `scan_result`
+        """
         try:
             scan_result = ScanResult(
                 code_info = code_info,
@@ -262,7 +271,11 @@ class InsertIntoDB(object):
         except:
             print 'Unable to put data into the database SaveResult'
 
-    def scan_file_info(self, scan_result, file_path):
+    def insert_into_scan_file_info(self, scan_result, file_path):
+        """
+        Add `file_path into `ScanFileInfo` using `scan_result`
+        and return `scan_file_info`.
+        """
         try:
             scan_file_info = ScanFileInfo(
                 scan_result = scan_result,
@@ -274,7 +287,11 @@ class InsertIntoDB(object):
         except:
             print 'Database error at ScanFileInfo'
 
-    def add_license(self, scan_file_info, category, start_line, spdx_url, text_url, spdx_license_key, homepage_url, score, end_line, key, owner, dejacode_url):
+    def insert_into_license(self, scan_file_info, category, start_line, spdx_url, text_url, spdx_license_key, homepage_url, score, end_line, key, owner, dejacode_url):
+        """
+        Add `category`, `start_line`, `spdx_url`, `text_url`, `spdx_license_key`, `homepage_url`, `score`, `end_line`, `key`, `owner`, `dejacode_url` into `License` model using `scan_file_info`
+        and return `license`.
+        """
         try:
             license = License(
                 scan_file_info = scan_file_info,
@@ -296,7 +313,11 @@ class InsertIntoDB(object):
         except:
             print('Database error at model License')
 
-    def matched_rule(self, license, license_choice, identifier):
+    def insert_into_matched_rule(self, license, license_choice, identifier):
+        """
+        Add `license_choice`, `identifier` into model `MatchedRule` using `license` 
+        and return `matched_rule`.
+        """
         try:
             matched_rule = MatchedRule(
                 license = license,
@@ -309,7 +330,10 @@ class InsertIntoDB(object):
         except:
             print('Database error at model MatchedRule')
 
-    def matched_rule_licenses(self, matched_rule, a_license):
+    def insert_into_matched_rule_licenses(self, matched_rule, a_license):
+        """
+        Add `a_license` into model `MatchedRuleLicenses` using `matched_rule`
+        """
         try:
             matched_rule_licenses = MatchedRuleLicenses(
                 matched_rule = matched_rule,
@@ -320,7 +344,11 @@ class InsertIntoDB(object):
         except:
             print('Database error at model matchedRuleLicense')
 
-    def add_copyright(self, scan_file_info, start_line, end_line):
+    def insert_into_copyright(self, scan_file_info, start_line, end_line):
+        """
+        Add `start_line`, `end_line` into model `Copyright` using `scan_file_info`
+        and return `copyright`
+        """
         try:
             copyright = Copyright(
                 scan_file_info = scan_file_info,
@@ -333,7 +361,10 @@ class InsertIntoDB(object):
         except:
             print('Database error at model Copyright')
 
-    def copyright_holder(self, copyright, holder):
+    def insert_into_copyright_holders(self, copyright, holder):
+        """
+        Add copyright `holder` into model `CopyrightHolders` using `copyright`
+        """
         try:
             copyright_holder = CopyrightHolders(
                 copyright = copyright,
@@ -344,7 +375,10 @@ class InsertIntoDB(object):
         except:
             print('Database error at model CopyrightHolder')
 
-    def copyright_statements(self, copyright, statement):
+    def insert_into_copyright_statements(self, copyright, statement):
+        """
+        Add copyright `statement` into model `CopyrightStatements` using `copyright`
+        """
         try:
             copyright_statements = CopyrightStatements(
                 copyright = copyright,
@@ -355,7 +389,10 @@ class InsertIntoDB(object):
         except:
             print('Database error at model CopyrightStatements')
 
-    def copyright_author(self, copyright, author):
+    def insert_into_copyright_author(self, copyright, author):
+        """
+        Add copyright `author` into model `CopyrightAuthor` using `copyright`
+        """
         try:
             copyright_author = CopyrightAuthor(
                 copyright = copyright,
@@ -366,7 +403,10 @@ class InsertIntoDB(object):
         except:
             print('Database error at model CopyrightAuthor')
 
-    def add_Package(self, scan_file_info, package):
+    def insert_into_Package(self, scan_file_info, package):
+        """
+        Add `package` into model `Package` using `scan_file_info`
+        """
         try:
             package = Package(
                 scan_file_info = scan_file_info,
@@ -377,7 +417,10 @@ class InsertIntoDB(object):
         except:
             print 'Database error at model Package'
 
-    def add_scan_error(self, scan_file_info, scan_error):
+    def insert_into_scan_error(self, scan_file_info, scan_error):
+        """
+        Add `scan_error` into model `ScanError` using `scan_file_info`
+        """
         try:
             scan_error = ScanError(
                 scan_file_info = scan_file_info,
