@@ -37,6 +37,14 @@ from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
 
+from django.views.decorators.csrf import csrf_exempt
+from . import models
+from rest_framework.authtoken.models import Token
+from django.http import HttpResponse
+import json
+from django.db import transaction
+from django.contrib.auth.models import User
+from django.views import View
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -118,6 +126,28 @@ class ScanResults(TemplateView):
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
+class LoginView(TemplateView):
+    template_name = "scanapp/login.html"
 
-def login(request):
-    return render(request, 'scanapp/login.html')
+
+class RegisterView(View):
+    def post(self, request):
+        if request.POST.get('password') != request.POST.get('confirm-password'):
+            return HttpResponse("Unauthorized- Password doesn't match", status=401)
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=request.POST.get('username'),
+                password=request.POST.get('password'),
+                email=request.POST.get('email')
+            )
+
+            user.save()
+
+        return HttpResponse(
+            json.dumps(
+                {
+                    'token': Token.objects.get(user=user).key
+                }
+            )
+        )
