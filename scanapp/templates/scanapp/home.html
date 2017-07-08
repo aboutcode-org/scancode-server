@@ -1,0 +1,54 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <link rel="stylesheet" href="{% static "css/home.css" %}">
+</head>
+
+<body>
+
+
+<header class="projects">
+    <h1 class="projects-title">Scancode</h1>
+
+</header>
+<section class="projects">
+    <div class="wrapper">
+        <p class="tagline">The best tool to scan codes.</p>
+
+        <div class="col-3">
+            <div>
+                <br/>
+            </div>
+            <a href="{% url 'urlceleryformview' %}">
+            <div class="col-3-project-element-1">
+                <span class="category-note">URL SCAN</span>
+                <h3 class="project-heading-large">Scan a URL</h3>
+                <p class="date-note"> Scan your url containing files and get your scan results.</p>
+            </div>
+            </a>
+            <a href="{% url 'localuploadview' %}">
+            <div class="col-3-project-element-2">
+                <span class="category-note">UPLOAD FILES</span>
+                <h3 class="project-heading-large">Upload Files</h3>
+                <p class="date-note"> Upload your files and get your scan results.</p>
+            </div>
+            </a>
+            <a href="#">
+            <div class="col-3-project-element-3">
+                <span class="category-note">WRITE CODE</span>
+                <h3 class="project-heading-large">Write Code</h3>
+                <p class="date-note"> Edit your code on an editor and get the code scanned.</p>
+            </div>
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+<div class="about">
+    <a href="#" class="about-link">About scancode</a>
+</div>
