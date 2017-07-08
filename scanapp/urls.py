@@ -37,7 +37,7 @@ from . import views
 
 urlpatterns = [
 
-    url(r'^index/', TemplateView.as_view(template_name="scanapp/index.html")),
+    url(r'^index/', TemplateView.as_view(template_name="scanapp/home.html")),
     url(r'^localscan/', LocalUploadView.as_view(), name='localuploadview'),
     url(r'^urlscan/', URLFormViewCelery.as_view(), name='urlceleryformview'),
     url(r'^resultscan/(?P<pk>[0-9]+)', ScanResults.as_view(), name='resultview'),

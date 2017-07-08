@@ -1,0 +1,196 @@
+
+body {
+    padding: 0;
+    font-size: 16px;
+    line-height: 150%;
+    font-family: 'HelveticaNeueETW01-55Rg';
+    color: #444444;
+    background: #ffffff;
+
+}
+
+p {
+    margin-bottom: 25px;
+}
+
+header.projects {
+    width: 93.75%;
+    margin: 5.625em auto;
+    max-width: 1280px;
+    background: #fff;
+    text-align: center;
+    border-top: 1px solid #d4d4d4;
+}
+
+h1.projects-title {
+    margin: -0.5em auto 0.5em auto;
+    padding: 0 1em;
+    background: #fff;
+    font-size: 3.75em;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-family: "Helvetica Neue eText Pr1255995";
+    max-width: 6.6667em;
+}
+
+section.projects {
+    padding: 5.625em 0;
+    background: #F5F5F1;
+}
+
+div.wrapper {
+    width: 93.75%;
+    margin: 0 auto;
+    max-width: 1280px;
+}
+
+p.tagline {
+    text-align: center;
+    font-size: 2.25em;
+    line-height: 1.333;
+    margin: 0 1.667em 2.5em 1.667em;
+    color: #9E9E9E;
+}
+
+div.col-3:after {
+    content: " ";
+    display: table;
+    clear: both;
+}
+
+div.col-2:before {
+    content: " ";
+    display: table;
+}
+
+div.col-3:before {
+    content: " ";
+    display: table;
+}
+
+div.col-2:after {
+    content: " ";
+    display: table;
+    clear: both;
+}
+
+span.category-note {
+    display: block;
+    color: #CECBB6;
+    padding: 0 0 0.714em 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.875em;
+    line-height: 1.857;
+    margin: 0;
+    background: #F5F5F1;
+}
+
+img {
+    max-width: 100%;
+}
+
+h3.project-heading-large {
+    font-size: 1.875em;
+    line-height: 1.2;
+    margin: 1.33333333333333em 32px 0.5em;
+}
+
+p.date-note {
+    margin: 0 5% 2.857em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #ccc;
+    font-size: 0.875em;
+    line-height: 1.857;
+}
+
+div.col-3-project-element-3 {
+    background: #fff;
+    text-decoration: none;
+    border-bottom: 2px solid #DDDBCC;
+    margin-bottom: 2.5em;
+    padding: 0;
+    width: 31.25%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: left;
+}
+
+div.col-3-project-element-1 {
+    background: #fff;
+    text-decoration: none;
+    border-bottom: 2px solid #DDDBCC;
+    margin-bottom: 2.5em;
+    padding: 0;
+    width: 31.25%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-right: 3.125%;
+    float: left;
+}
+
+div.col-3-project-element-2 {
+    background: #fff;
+    text-decoration: none;
+    border-bottom: 2px solid #DDDBCC;
+    margin-bottom: 2.5em;
+    padding: 0;
+    width: 31.25%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-right: 3.125%;
+    float: left;
+}
+
+div.col-3-project-element-5 {
+    background: #fff;
+    text-decoration: none;
+    border-bottom: 2px solid #DDDBCC;
+    margin-bottom: 2.5em;
+    padding: 0;
+    width: 31.25%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: left;
+    margin-right: 3.125%;
+}
+
+div.col-3-project-element-6 {
+    background: #fff;
+    text-decoration: none;
+    border-bottom: 2px solid #DDDBCC;
+    margin-bottom: 2.5em;
+    padding: 0;
+    width: 31.25%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: left;
+}
+
+div.about {
+    padding: 2.5em 0 5.625em 0;
+    text-align: center;
+}
+
+a.about-link {
+    padding: 1.429em 0;
+    display: inline-block;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid #9E9E9E;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.875em;
+    line-height: 1.857;
+    margin: 0;
+    color: #9E9E9E;
+}
