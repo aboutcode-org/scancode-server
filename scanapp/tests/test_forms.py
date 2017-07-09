@@ -1,5 +1,7 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files import File
+
 from scanapp.forms import URLScanForm
 from scanapp.forms import LocalScanForm
 
