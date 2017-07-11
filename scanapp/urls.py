@@ -30,8 +30,9 @@ from scanapp.views import ScanResults
 from scanapp.views import URLFormViewCelery
 
 from rest_framework.authtoken import views as rest_views
-from scanapp.views import RegisterView
+# from scanapp.views import RegisterView
 from scanapp.views import LoginView
+from scanapp.views import *
 
 from . import views
 
@@ -41,8 +42,7 @@ urlpatterns = [
     url(r'^localscan/', LocalUploadView.as_view(), name='localuploadview'),
     url(r'^urlscan/', URLFormViewCelery.as_view(), name='urlceleryformview'),
     url(r'^resultscan/(?P<pk>[0-9]+)', ScanResults.as_view(), name='resultview'),
-    url(r'^login/', LoginView.as_view(), name='login'),
+    url(r'^login/', csrf_exempt(RegisterView.as_view()), name='login'),
     url(r'^signin/', rest_views.obtain_auth_token, name='signin'),
-    url(r'^signup/?', RegisterView.as_view(), name='signup'),
 
 ]
