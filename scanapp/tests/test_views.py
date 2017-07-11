@@ -154,10 +154,11 @@ class LoginViewTestCase(TestCase):
         request = RequestFactory().get('/login')
         request.user = user
         response = LoginView.as_view()(request)
+        #FIXME login_view must not be accesible to logged in user and it should redirect
         self.assertEqual(302, response.status_code)
 
     def test_login_view_anonymous_user_post_request(self):
+        user = User.objects.create_user(username='username', password='password')
         request = RequestFactory().post('/login', {'username': 'username', 'password': 'password'})
-        request.user = AnonymousUser()
         response = LoginView.as_view()(request)
-        self.assertEqual(str(response.context), 'username') 
+        self.assertEqual(str(response.context['user']), 'username')
