@@ -161,3 +161,16 @@ class RegisterView(View):
                 }
             )
         )
+
+from django.http import HttpResponse
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import URLScanInfo
+from .serializers import UrlScanInfoSerializer
+class ProductList(APIView):
+    def get(self, request, format=None):
+        products = URLScanInfo.objects.all()
+        serializer = UrlScanInfoSerializer(products, many=True)
+        return Response(serializer.data)
