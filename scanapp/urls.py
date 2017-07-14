@@ -28,6 +28,7 @@ from django.views.generic import TemplateView
 from scanapp.views import LocalUploadView
 from scanapp.views import ScanResults
 from scanapp.views import URLFormViewCelery
+from scanapp.views import UrlScanSpecialView
 
 from rest_framework.authtoken import views as rest_views
 from scanapp.views import RegisterView
@@ -45,5 +46,6 @@ urlpatterns = [
     url(r'^signin/', rest_views.obtain_auth_token, name='signin'),
     url(r'^signup/?', RegisterView.as_view(), name='signup'),
     url(r'^home/', TemplateView.as_view(template_name="scanapp/home.html")),
+    url(r'^urlspecialscan/', UrlScanSpecialView.as_view(), name='urlspecialformview'),
 
 ]

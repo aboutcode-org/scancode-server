@@ -45,6 +45,16 @@ import json
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
+import subprocess
+from tasks import save_results_to_db
+
+from tasks import scan_code_async_special
+
+from os.path import expanduser
+import os, shutil
+
+import git
+
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -126,6 +136,7 @@ class ScanResults(TemplateView):
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
+
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
 
@@ -151,3 +162,60 @@ class RegisterView(View):
                 }
             )
         )
+
+
+class UrlScanSpecialView(FormView):
+    template_name = 'scanapp/urlspecialscan.html'
+    form_class = URLScanForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # get the URL from the form
+            URL = request.POST['URL']
+
+            scan_type = 'SpecialURL'
+
+            dir_name = 'temp'
+
+            home_path = expanduser("~")
+
+            os.chdir(home_path)
+
+            if os.path.isdir(dir_name):
+                shutil.rmtree(dir_name)
+
+            os.mkdir(dir_name)
+
+            repo = git.Repo.init(dir_name)
+            origin = repo.create_remote('origin', URL)
+            origin.fetch()
+            origin.pull(origin.refs[0].remote_head)
+
+            print "Done ! Remote repository cloned."
+
+            # Create an Instance of InsertIntoDB
+            insert_into_db = InsertIntoDB()
+
+            # call the create_scan_id function
+            scan_id = insert_into_db.create_scan_id(scan_type)
+
+            filename = home_path + '/temp/'
+
+            # print filename
+
+            path = filename
+
+            folder_name = filename,
+            URL = None
+
+            scan_result = subprocess.check_output(['scancode', filename])
+            json_data = json.loads(scan_result)
+            return HttpResponse(
+                json.dumps(
+                    {
+                        'json': json_data
+                    }
+                )
+            )
