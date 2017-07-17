@@ -46,4 +46,5 @@ urlpatterns = [
     url(r'^signup/?', RegisterView.as_view(), name='signup'),
     url(r'^home/', TemplateView.as_view(template_name="scanapp/home.html")),
     url(r'^products/$', views.ProductList.as_view()),
+    url(r'^api/licenses/$', views.LicenseList.as_view()),
 ]
