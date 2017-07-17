@@ -44,5 +44,5 @@ urlpatterns = [
     url(r'^login/', LoginView.as_view(), name='login'),
     url(r'^signin/', rest_views.obtain_auth_token, name='signin'),
     url(r'^signup/?', RegisterView.as_view(), name='signup'),
-    url(r'^products/$', views.ProductList.as_view()),
+    url(r'^api/licenses/$', views.LicenseList.as_view()),
 ]

@@ -21,7 +21,6 @@
 #  scancode-server is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
-# To store the files on the server we use this import
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -30,22 +29,37 @@ from django.views.generic.edit import FormView
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import URLScanForm
+
 from scanapp.models import CodeInfo
 from scanapp.models import ScanInfo
 from scanapp.models import URLScanInfo
 from scanapp.models import ScanResult
+from scanapp.models import MatchedRuleLicenses
+from scanapp.models import Package
+from scanapp.models import ScanError
+
 from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
 
 from django.views.decorators.csrf import csrf_exempt
-from . import models
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse
 import json
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
+
+from django.http import HttpResponse
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from scanapp.serializers import MatchedRuleLicenseSerializer
+from scanapp.serializers import PackageSerializer
+from scanapp.serializers import ScanError
+
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -127,6 +141,7 @@ class ScanResults(TemplateView):
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
+
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
 
@@ -153,15 +168,17 @@ class RegisterView(View):
             )
         )
 
-from django.http import HttpResponse
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import URLScanInfo
-from .serializers import UrlScanInfoSerializer
-class ProductList(APIView):
+
+#### API views ####
+class LicenseList(APIView):
     def get(self, request, format=None):
-        products = URLScanInfo.objects.all()
-        serializer = UrlScanInfoSerializer(products, many=True)
+        licenses = MatchedRuleLicenses.objects.all()
+        serializer = MatchedRuleLicenseSerializer(licenses, many=True)
+        return Response(serializer.data)
+
+
+class PackageList(APIView):
+    def get(self, request, format=None):
+        package = Package.objects.all()
+        serializer = PackageSerializer(licenses, many=True)
         return Response(serializer.data)

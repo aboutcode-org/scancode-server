@@ -19,13 +19,15 @@ from scanapp.models import CopyrightAuthor
 from scanapp.models import Package
 from scanapp.models import ScanError
 
+
 class ScanInfoSerializer(serializers.ModelSerializer):
     """
     ModelSerializer for `ScanInfo` model with all fields
     """
     class Meta:
         model = ScanInfo
-        fields = '__all__'
+        exclude = ('id',)
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -33,7 +35,8 @@ class UserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ('id',)
+
 
 class UserInfoSerializer(serializers.ModelSerializer):
     """
@@ -43,7 +46,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
     scan_info_serializer = ScanInfoSerializer()
     class Meta:
         model = UserInfo
-        fields = '__all__'
+        exclude = ('id',)
+
 
 class UrlScanInfoSerializer(serializers.ModelSerializer):
     """
@@ -52,16 +56,18 @@ class UrlScanInfoSerializer(serializers.ModelSerializer):
     scan_info = ScanInfoSerializer()
     class Meta:
         model = URLScanInfo
-        fields = '__all__'
+        exclude = ('id',)
+
 
 class LocalScanInfoSerializer(serializers.ModelSerializer):
     """
     ModelSerializer for `LocalScanInfo` with all fields
     """
     scan_info = ScanInfoSerializer()
+    
     class Meta:
         model = LocalScanInfo
-        fields = '__all__'
+        exclude = ('id',)
 
 class CodeInfoSerializer(serializers.ModelSerializer):
     """
@@ -70,7 +76,7 @@ class CodeInfoSerializer(serializers.ModelSerializer):
     scan_info = ScanInfoSerializer()
     class Meta:
         model = CodeInfo
-        fields = '__all__'
+        exclude = ('id',)
 
 class ScanResultSerializer(serializers.ModelSerializer):
     """
@@ -79,7 +85,7 @@ class ScanResultSerializer(serializers.ModelSerializer):
     code_info = CodeInfoSerializer()
     class Meta:
         model = ScanResult
-        fields = '__all__'
+        exclude = ('id',)
 
 class ScanFileInfoSerializer(serializers.ModelSerializer):
     """
@@ -88,7 +94,7 @@ class ScanFileInfoSerializer(serializers.ModelSerializer):
     scan_result = ScanResultSerializer()
     class Meta:
         model = ScanFileInfo
-        fields = '__all__'
+        exclude = ('id',)
 
 class LicenseSerializer(serializers.ModelSerializer):
     """
@@ -97,7 +103,7 @@ class LicenseSerializer(serializers.ModelSerializer):
     scan_file_info = ScanFileInfoSerializer()
     class Meta:
         model = License
-        fields = '__all__'
+        exclude = ('id',)
 
 class MatchedRuleSerializer(serializers.ModelSerializer):
     """
@@ -106,16 +112,16 @@ class MatchedRuleSerializer(serializers.ModelSerializer):
     license = LicenseSerializer()
     class Meta:
         model = MatchedRule
-        fields = '__all__'
+        exclude = ('id',)
 
 class MatchedRuleLicenseSerializer(serializers.ModelSerializer):
     """
     ModelSerializer for `MatchedRuleLicense` with all fields
     """
-    license = MatchedRuleSerializer()
+    matched_rule = MatchedRuleSerializer()
     class Meta:
         model = MatchedRuleLicenses
-        fields = '__all__'
+        exclude = ('id',)
 
 class CopyrightSerializer(serializers.ModelSerializer):
     """
@@ -124,7 +130,7 @@ class CopyrightSerializer(serializers.ModelSerializer):
     scan_file_info = ScanFileInfoSerializer()
     class Meta:
         model = Copyright
-        fields = '__all__'
+        exclude = ('id',)
 
 class CopyrightHolderSerializer(serializers.ModelSerializer):
     """
@@ -133,7 +139,7 @@ class CopyrightHolderSerializer(serializers.ModelSerializer):
     copyright = CopyrightSerializer()
     class Meta:
         model = CopyrightHolders
-        fields = '__all__'
+        exclude = ('id',)
 
 class CopyrightStatementSerializer(serializers.ModelSerializer):
     """
@@ -142,7 +148,7 @@ class CopyrightStatementSerializer(serializers.ModelSerializer):
     copyright = CopyrightSerializer()
     class Meta:
         model = CopyrightStatements
-        fields = '__all__'
+        exclude = ('id',)
 
 class CopyrightAuthorSerializer(serializers.ModelSerializer):
     """
@@ -151,7 +157,7 @@ class CopyrightAuthorSerializer(serializers.ModelSerializer):
     copyright = CopyrightSerializer()
     class Meta:
         model = CopyrightAuthor
-        fields = '__all__'
+        exclude = ('id',)
 
 class PackageSerializer(serializers.ModelSerializer):
     """
@@ -160,23 +166,13 @@ class PackageSerializer(serializers.ModelSerializer):
     scan_file_info = ScanFileInfoSerializer()
     class Meta:
         model = Package
-        fields = '__all__'
+        exclude = ('id',)
 
-class PackageSerializer(serializers.ModelSerializer):
+class ScanErrorSerializer(serializers.ModelSerializer):
     """
     ModelSerializer for `Package` with all fields
     """
     scan_file_info = ScanFileInfoSerializer()
     class Meta:
         model = ScanError
-        fields = '__all__'
-
-class AllModelSerializer(serializers.BaseSerializer):
-    """
-    Base serializer to combine all the serializers
-    """
-    scan_info = ScanInfoSerializer()
-    user_info = UserInfoSerializer()
-    url_scan_info = UrlScanInfoSerializer()
-    local_scan_info = LocalScanInfoSerializer()
-
+        exclude = ('id',)
