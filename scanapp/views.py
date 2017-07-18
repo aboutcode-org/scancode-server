@@ -45,6 +45,19 @@ import json
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
+import subprocess
+from tasks import save_results_to_db
+
+from tasks import scan_code_async_special
+
+from os.path import expanduser
+import os, shutil
+
+import git
+
+
+from urlparse import urlparse
+
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -126,6 +139,7 @@ class ScanResults(TemplateView):
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
+
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
 
@@ -151,3 +165,147 @@ class RegisterView(View):
                 }
             )
         )
+
+
+class URLFormView(FormView):
+    template_name = 'scanapp/urlspecialscan.html'
+    form_class = URLScanForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # get the URL from the form
+            URL = request.POST['URL']
+
+            scan_type = 'URL'
+
+            allowed_exts = ('git')
+            url = urlparse(URL)
+
+            # Create an Instance of InsertIntoDB
+            insert_into_db = InsertIntoDB()
+
+            # call the create_scan_id function
+            scan_id = insert_into_db.create_scan_id(scan_type)
+
+            if url.path.rsplit('.', 1)[1] in allowed_exts:
+                print 'git repo'
+
+                dir_name = 'temp'
+
+                home_path = expanduser("~")
+
+                os.chdir(home_path)
+
+                if os.path.isdir(dir_name):
+                    shutil.rmtree(dir_name)
+
+                os.mkdir(dir_name)
+
+                repo = git.Repo.init(dir_name)
+                origin = repo.create_remote('origin', URL)
+                origin.fetch()
+                origin.pull(origin.refs[0].remote_head)
+
+                print "Done ! Remote repository cloned."
+
+                # Create an Instance of InsertIntoDB
+                insert_into_db = InsertIntoDB()
+
+                # call the create_scan_id function
+                scan_id = insert_into_db.create_scan_id(scan_type)
+
+                filename = home_path + '/temp/'
+
+                # print filename
+
+                path = filename
+
+                folder_name = None
+
+                apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
+
+                # return the response as HttpResponse
+                return HttpResponseRedirect('/resultscan/' + str(scan_id))
+
+            else:
+
+                # different paths for both anonymous and registered users
+                if (str(request.user) == 'AnonymousUser'):
+                    path = 'media/AnonymousUser/URL/'
+
+                else:
+                    path = 'media/user/' + str(request.user) + '/URL/'
+
+                scan_code_async.delay(URL, scan_id, path)
+                # return the response as HttpResponse
+                return HttpResponseRedirect('/resultscan/' + str(scan_id))
+
+
+class UrlScanSpecialView(FormView):
+    template_name = 'scanapp/urlspecialscan.html'
+    form_class = URLScanForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # get the URL from the form
+            URL = request.POST['URL']
+
+            scan_type = 'URL'
+
+            dir_name = 'temp'
+
+            home_path = expanduser("~")
+
+            os.chdir(home_path)
+
+            if os.path.isdir(dir_name):
+                shutil.rmtree(dir_name)
+
+            os.mkdir(dir_name)
+
+            repo = git.Repo.init(dir_name)
+            origin = repo.create_remote('origin', URL)
+            origin.fetch()
+            origin.pull(origin.refs[0].remote_head)
+
+            print "Done ! Remote repository cloned."
+
+            # Create an Instance of InsertIntoDB
+            insert_into_db = InsertIntoDB()
+
+            # call the create_scan_id function
+            scan_id = insert_into_db.create_scan_id(scan_type)
+
+            filename = home_path + '/temp/'
+
+            # print filename
+
+            path = filename
+
+            folder_name = None
+
+            apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
+
+            # return the response as HttpResponse
+            return HttpResponseRedirect('/resultscan/' + str(scan_id))
+
+        """
+
+            folder_name = filename,
+            URL = None
+
+            scan_result = subprocess.check_output(['scancode', filename])
+            json_data = json.loads(scan_result)
+            return HttpResponse(
+                json.dumps(
+                    {
+                        'json': json_data
+                    }
+                )
+            )
+
+            """

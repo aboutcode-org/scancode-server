@@ -77,7 +77,7 @@ class LocalScanInfo(models.Model):
 
 class CodeInfo(models.Model):
     def __str__(self):
-        return self.total_code_files
+        return str(self.total_code_files)
 
     scan_info = models.ForeignKey(ScanInfo)
     total_code_files = models.IntegerField(null=True, blank=True)
@@ -88,7 +88,7 @@ class CodeInfo(models.Model):
 # Single result for each scan
 class ScanResult(models.Model):
     def __str__(self):
-        return self.total_errors
+        return str(self.total_errors)
 
     code_info = models.ForeignKey(CodeInfo)
     scanned_json_result = JSONField()
@@ -130,7 +130,7 @@ class License(models.Model):
 
 class MatchedRule(models.Model):
     def __str__(self):
-        return self.license_choice
+        return self.identifier
 
     license = models.ForeignKey(License)
     license_choice = models.BooleanField()
@@ -146,7 +146,7 @@ class MatchedRuleLicenses(models.Model):
 
 class Copyright(models.Model):
     def __str__(self):
-        return self.start_line
+        return str(self.start_line)
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
     start_line = models.IntegerField()
