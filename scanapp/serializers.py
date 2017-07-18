@@ -176,3 +176,80 @@ class ScanErrorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScanError
         exclude = ('id',)
+
+from django.core import serializers
+def anotherone():
+    scan_info = ScanInfo.objects.all()
+    for a_scan_info in scan_info:
+        if(a_scan_info.scan_type=='URL'):
+            url_scan_info = URLScanInfo.objects.filter(scan_info=a_scan_info)
+            print "REAL STRENGTH IS HERE"+serializers.serialize('json', url_scan_info, fields=('scan_info', 'URL') )+"REAL STRENGTH IS HERE"
+
+
+
+### Awesome code ####
+from scanapp.models import ScanInfo
+from scanapp.models import URLScanInfo
+from scanapp.models import LocalScanInfo
+from scanapp.models import CodeInfo
+from rest_framework import serializers
+class CodeScan(object):
+    def __init__(self, code_scan_obj, scan_info):
+        self.scan_info = scan_info
+        self.total_code_files = code_scan_obj.total_code_files
+        self.code_size = code_scan_obj.code_size
+
+class LocalScan(object):
+    def __init__(self, local_object, scan_info):
+        self.scan_info = scan_info
+        self.folder_name = local_object.folder_name
+
+class URLScan(object):
+    def __init__(self, url_object, scan_info):
+        self.url = url_object.URL
+        self.scan_info = scan_info
+
+class Scan(object):
+    def __init__(self, scan_object):
+        self.scan_type = scan_object.scan_type
+        self.is_complete = scan_object.is_complete
+
+class ScanSerializer(serializers.Serializer):
+    scan_type = serializers.CharField()
+    is_complete = serializers.BooleanField()
+
+class UrlScanSerializer(serializers.Serializer):
+    scan_info = ScanSerializer()
+    url = serializers.URLField()
+
+class LocalScanSerializer(serializers.Serializer):
+    scan_info = ScanSerializer()
+    folder_name = serializers.CharField()
+
+class CodeScanSerializer(serializers.Serializer):
+    scan_info = ScanSerializer()
+    total_code_files = serializers.IntegerField()
+    code_size = serializers.IntegerField()
+
+#a_scan = Scan(ScanInfo.objects.get(pk=36))
+scan_info = ScanInfo.objects.all()
+chromo = list()
+for a_scan in scan_info:
+    b_scan = Scan(a_scan)
+    if(a_scan.scan_type == 'URL'):
+        try:
+            url_scan_info = URLScan(URLScanInfo.objects.get(scan_info=a_scan), a_scan)
+            code_scan = CodeScan(CodeInfo.objects.get(scan_info=a_scan), a_scan)
+            serializer = CodeScanSerializer(code_scan)
+            chromo.append(serializer.data)
+        except:
+            print("Go on don't worry")
+    else:
+        try:
+            local_scan_info = LocalScan(LocalScanInfo.objects.get(scan_info=a_scan), a_scan)
+            serializer = LocalScanSerializer(local_scan_info)
+            chromo.append(serializer.data)
+        except:
+            print("Don't worry")
+
+print(chromo) 
