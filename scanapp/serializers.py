@@ -194,20 +194,21 @@ from scanapp.models import LocalScanInfo
 from scanapp.models import CodeInfo
 from rest_framework import serializers
 class CodeScan(object):
-    def __init__(self, code_scan_obj, scan_info):
-        self.scan_info = scan_info
+    def __init__(self, code_scan_obj):
         self.total_code_files = code_scan_obj.total_code_files
         self.code_size = code_scan_obj.code_size
 
 class LocalScan(object):
-    def __init__(self, local_object, scan_info):
+    def __init__(self, local_object, scan_info, code_info):
         self.scan_info = scan_info
+        self.code_info = code_info
         self.folder_name = local_object.folder_name
 
 class URLScan(object):
-    def __init__(self, url_object, scan_info):
-        self.url = url_object.URL
+    def __init__(self, url_object, scan_info, code_info):
         self.scan_info = scan_info
+        self.code_info = code_info
+        self.url = url_object.URL
 
 class Scan(object):
     def __init__(self, scan_object):
@@ -218,18 +219,15 @@ class ScanSerializer(serializers.Serializer):
     scan_type = serializers.CharField()
     is_complete = serializers.BooleanField()
 
+class CodeScanSerializer(serializers.Serializer):
+    total_code_files = serializers.IntegerField()
+    code_size = serializers.IntegerField()
+
 class UrlScanSerializer(serializers.Serializer):
-    scan_info = ScanSerializer()
     url = serializers.URLField()
 
 class LocalScanSerializer(serializers.Serializer):
-    scan_info = ScanSerializer()
     folder_name = serializers.CharField()
-
-class CodeScanSerializer(serializers.Serializer):
-    scan_info = ScanSerializer()
-    total_code_files = serializers.IntegerField()
-    code_size = serializers.IntegerField()
 
 #a_scan = Scan(ScanInfo.objects.get(pk=36))
 scan_info = ScanInfo.objects.all()
@@ -238,18 +236,113 @@ for a_scan in scan_info:
     b_scan = Scan(a_scan)
     if(a_scan.scan_type == 'URL'):
         try:
-            url_scan_info = URLScan(URLScanInfo.objects.get(scan_info=a_scan), a_scan)
-            code_scan = CodeScan(CodeInfo.objects.get(scan_info=a_scan), a_scan)
-            serializer = CodeScanSerializer(code_scan)
+            code_info = CodeInfo.objects.get(scan_info=a_scan)
+            url_scan_info = URLScan(URLScanInfo.objects.get(scan_info=a_scan), b_scan, code_info)
+            serializer = UrlScanSerializer(url_scan_info)
             chromo.append(serializer.data)
         except:
             print("Go on don't worry")
     else:
         try:
-            local_scan_info = LocalScan(LocalScanInfo.objects.get(scan_info=a_scan), a_scan)
+            code_info = CodeInfo.objects.get(scan_info=a_scan)
+            local_scan_info = LocalScan(LocalScanInfo.objects.get(scan_info=a_scan), a_scan, code_info)
             serializer = LocalScanSerializer(local_scan_info)
             chromo.append(serializer.data)
         except:
             print("Don't worry")
 
-print(chromo) 
+print(chromo)
+
+
+##### Brilliant code ######
+from scanapp.models import ScanInfo
+from scanapp.models import URLScanInfo
+from scanapp.models import LocalScanInfo
+from scanapp.models import CodeInfo
+from scanapp.models import ScanResult
+from rest_framework import serializers
+
+
+class CodeScan(object):
+    def __init__(self, code_scan_obj):
+        self.total_code_files = code_scan_obj.total_code_files
+        self.code_size = code_scan_obj.code_size
+
+
+class Scan(object):
+    def __init__(self, scan_object, code_info=None, url_scan=None, local_scan=None, scan_result=None):
+        self.scan_type = scan_object.scan_type
+        self.is_complete = scan_object.is_complete
+        self.code_info = code_info
+        self.url_scan = url_scan
+        self.local_scan = local_scan
+        self.scan_result = scan_result
+
+
+#TODO check that after removing these things work or not.
+class URLScan(object):
+    def __init__(self, url_object):
+        self.url = url_object.URL
+
+
+class LocalScan(object):
+    def __init__(self, local_object):
+        self.folder_name = local_object.folder_name
+
+
+class UrlScanSerializer(serializers.Serializer):
+    url = serializers.URLField()
+
+
+class LocalScanSerializer(serializers.Serializer):
+    folder_name = serializers.CharField()
+
+
+class ScanResultSerializer(serializers.Serializer):
+    pass
+
+class ScanSerializer(serializers.Serializer):
+    scan_type = serializers.CharField()
+    is_complete = serializers.BooleanField()
+    code_info = CodeScanSerializer()
+    url_scan = UrlScanSerializer()
+    local_scan = LocalScanSerializer()
+    scan_result = ScanResultSerializer()
+
+
+scan_info = ScanInfo.objects.all()
+chromo = list()
+for a_scan in scan_info:
+    if(a_scan.scan_type == 'URL'):
+        try:
+            try:
+                code_info = CodeInfo.objects.get(scan_info=a_scan)
+            except:
+                code_info = None
+            url_scan = URLScan(URLScanInfo.objects.get(scan_info=a_scan)) or None
+            local_scan = None
+            try:
+                scan_result = ScanResult.objects.get(code_info=code_info)
+            except:
+                scan_result = None
+            scan = Scan(a_scan, code_info, url_scan, local_scan, scan_result)
+            serializer = ScanSerializer(scan)
+            chromo.append(serializer.data)
+        except:
+            print("Go on don't worry")
+    else:
+        try:
+            try:
+                code_info = CodeInfo.objects.get(scan_info=a_scan)
+            except:
+                code_info = None
+            local_scan = LocalScanInfo.objects.get(scan_info=a_scan) or None
+            url_scan = None
+            scan = Scan(a_scan, code_info, url_scan, local_scan)
+            serializer = ScanSerializer(scan)
+            chromo.append(serializer.data)
+        except:
+            print("Don't worry")
+
+print(chromo)
+
