@@ -22,11 +22,18 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 # To store the files on the server we use this import
+import json
+
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from rest_framework.authtoken.models import Token
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import URLScanForm
@@ -37,14 +44,6 @@ from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
 
-from django.views.decorators.csrf import csrf_exempt
-from . import models
-from rest_framework.authtoken.models import Token
-from django.http import HttpResponse
-import json
-from django.db import transaction
-from django.contrib.auth.models import User
-from django.views import View
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -125,6 +124,7 @@ class ScanResults(TemplateView):
             result = scan_result.scanned_json_result
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
+
 
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
