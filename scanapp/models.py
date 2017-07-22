@@ -31,86 +31,55 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 
-# Create your models here.
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
 
-class ScanInfo(models.Model):
+class Scan(models.Model):
+    """
+    Store various attributes of a scan like `scan_type`, `is_complete`, `user`, 
+    `URL`, `code_directory`, `total_code_files`, `code_size`, `scancode_notice`,
+    `scancode_version`, `files_count`, `total_error`, `scan_time`
+    """
     def __str__(self):
         return self.scan_type
 
-    # types of scans that can be applied
     scan_types = (
-        ('URL', 'URL'),
-        ('Local Scan', 'localscan'),
+        ('url', 'url'),
+        ('localscan', 'localscan'),
     )
 
-    scan_type = models.CharField(max_length=20, choices=scan_types, default='URL')
-    is_complete = models.BooleanField()
-
-class UserInfo(models.Model):
-    def __str__(self):
-        return self.user.username
-
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    scan_info = models.ForeignKey(ScanInfo)
-
-
-class URLScanInfo(models.Model):
-    def __str__(self):
-        return self.URL
-
-    scan_info = models.ForeignKey(ScanInfo)
-    URL = models.URLField(max_length=2000)
-
-
-class LocalScanInfo(models.Model):
-    def __str__(self):
-        return self.folder_name
-
-    scan_info = models.ForeignKey(ScanInfo)
-    folder_name = models.CharField(max_length=200)
-
-
-class CodeInfo(models.Model):
-    def __str__(self):
-        return self.total_code_files
-
-    scan_info = models.ForeignKey(ScanInfo)
+    scan_type = models.CharField(max_length=20, choices=scan_types, default='url')
+    is_complete = models.BooleanField(default=False)
+    user = models.ForeignKey(User, blank=True, null=True)
+    URL = models.URLField(max_length=2000, blank=True, null=True)
+    scan_directory = models.CharField(max_length=200)
     total_code_files = models.IntegerField(null=True, blank=True)
     code_size = models.IntegerField(null=True, blank=True, default=0)
-
-
-# ScanResult will store the most basic results of the scan
-# Single result for each scan
-class ScanResult(models.Model):
-    def __str__(self):
-        return self.total_errors
-
-    code_info = models.ForeignKey(CodeInfo)
-    scanned_json_result = JSONField()
-    scanned_html_result = models.CharField(max_length=10000)
-    scancode_notice = models.CharField(max_length=2000)
-    scancode_version = models.CharField(max_length=200)
+    scancode_notice = models.CharField(max_length=2000, blank=True, null=True)
+    scancode_version = models.CharField(max_length=200, blank=True, null=True)
     files_count = models.IntegerField(null=True, blank=True, default=0)
     total_errors = models.IntegerField(null=True, blank=True, default=0)
     scan_time = models.IntegerField(null=True, blank=True, default=0)
 
 
-# Single result for each file being scanned
 class ScanFileInfo(models.Model):
+    """
+    Store path of every file being scanned
+    """
     def __str__(self):
         return self.file_path
 
-    scan_result = models.ForeignKey(ScanResult)
+    scan = models.ForeignKey(Scan)
     file_path = models.CharField(max_length=400)
 
 
-# Multiple or no result for each file
 class License(models.Model):
+    """
+    Stores the License information present in the code
+    """
     def __str__(self):
         return self.key
 
@@ -129,31 +98,32 @@ class License(models.Model):
 
 
 class MatchedRule(models.Model):
+    """
+    Stores the MatchedRule about License present in the code
+    """
     def __str__(self):
-        return self.license_choice
+        return str(self.matched_rule)
 
     license = models.ForeignKey(License)
-    license_choice = models.BooleanField()
-    identifier = models.CharField(max_length=200)
+    matched_rule = models.JSONField()
 
-
-class MatchedRuleLicenses(models.Model):
-    def __str__(self):
-        return self.license
-
-    matched_rule = models.ForeignKey(MatchedRule)
-    license = models.CharField(max_length=200)
 
 class Copyright(models.Model):
+    """
+    Stores the copyright information present in the code
+    """
     def __str__(self):
-        return self.start_line
+        return str(self.start_line)
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
     start_line = models.IntegerField()
     end_line = models.IntegerField()
 
 
-class CopyrightHolders(models.Model):
+class CopyrightHolder(models.Model):
+    """
+    Stores the information of the copyright holders of the code
+    """
     def __str__(self):
         return self.holder
 
@@ -161,7 +131,10 @@ class CopyrightHolders(models.Model):
     holder = models.CharField(max_length=400)
 
 
-class CopyrightStatements(models.Model):
+class CopyrightStatement(models.Model):
+    """
+    Stores the information of the copyright statements in the code
+    """
     def __str__(self):
         return self.statement
 
@@ -170,6 +143,9 @@ class CopyrightStatements(models.Model):
 
 
 class CopyrightAuthor(models.Model):
+    """
+    Stores the information of the copyright authors in the code
+    """
     def __str__(self):
         return self.author
 
@@ -178,25 +154,22 @@ class CopyrightAuthor(models.Model):
 
 
 class Package(models.Model):
+    """
+    Stores the package imformation present in the code
+    """
     def __str__(self):
         return self.package
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
-    package = models.CharField(max_length=1000)
+    package = models.JSONField(max_length=1000)
 
 
 class ScanError(models.Model):
+    """
+    Stores the errors generated during the scan
+    """
     def __str__(self):
         return self.scan_error
 
     scan_file_info = models.ForeignKey(ScanFileInfo)
     scan_error = models.CharField(max_length=1000)
-
-
-class CeleryScan(models.Model):
-    scan_id = models.AutoField(primary_key=True)
-    scan_results = models.CharField(max_length=20000, null=True, blank=True)
-    is_complete = models.BooleanField(default=False)
-
-    def __str__(self):
-        return str(self.scan_id)
