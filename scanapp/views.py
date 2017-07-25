@@ -22,11 +22,20 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 # To store the files on the server we use this import
+import json
+import logging
+from urlparse import urlparse
+
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from rest_framework.authtoken.models import Token
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import URLScanForm
@@ -35,16 +44,10 @@ from scanapp.models import ScanInfo
 from scanapp.models import ScanResult
 from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
+from scanapp.tasks import parse_url
 from scanapp.tasks import scan_code_async
+from scanapp.tasks import scan_code_async_final
 
-from django.views.decorators.csrf import csrf_exempt
-from . import models
-from rest_framework.authtoken.models import Token
-from django.http import HttpResponse
-import json
-from django.db import transaction
-from django.contrib.auth.models import User
-from django.views import View
 
 class LocalUploadView(FormView):
     template_name = 'scanapp/localupload.html'
@@ -126,6 +129,7 @@ class ScanResults(TemplateView):
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
+
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
 
@@ -151,3 +155,46 @@ class RegisterView(View):
                 }
             )
         )
+
+
+class URLFormViewFinal(FormView):
+    template_name = 'scanapp/urlscan.html'
+    form_class = URLScanForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # get the URL from the form
+            URL = request.POST['URL']
+
+            logger = logging.getLogger(__name__)
+
+            scan_type = 'URL'
+
+            # Create an Instance of InsertIntoDB
+            insert_into_db = InsertIntoDB()
+
+            # call the create_scan_id function
+            scan_id = insert_into_db.create_scan_id(scan_type)
+
+            if parse_url(URL) == 1:
+                logger.info('git repo detected')
+
+                scan_code_async_final(URL, scan_id, scan_type)
+
+                # return the response as HttpResponse
+                return HttpResponseRedirect('/resultscan/' + str(scan_id))
+
+            else:
+
+                # different paths for both anonymous and registered users
+                if (str(request.user) == 'AnonymousUser'):
+                    path = 'media/AnonymousUser/URL/'
+
+                else:
+                    path = 'media/user/' + str(request.user) + '/URL/'
+
+                scan_code_async.delay(URL, scan_id, path)
+                # return the response as HttpResponse
+                return HttpResponseRedirect('/resultscan/' + str(scan_id))
