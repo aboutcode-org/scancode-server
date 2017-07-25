@@ -24,7 +24,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
-import os
 import subprocess
 import requests
 from datetime import datetime
@@ -42,32 +41,18 @@ from scanapp.models import ScanError
 from scanapp.celery import app
 
 @app.task
-def scan_code_async(URL, scan_id, path):
+def scan_code_async(url, scan_id, path, file_name):
     """
     Create and save a file at `path` present at `URL` using `scan_id` and bare `path`
     and apply the scan.
     """
-    scan_type = 'URL'
-
-    # logic to check how many files are already present for the scan
-    dir_list = list()
-    dir_list = os.listdir(path)
-
-    file_name = ''
-    if len(dir_list) == 0:
-        file_name = '1'
-    else:
-        dir_list.sort()
-        file_name = str(1 + int(dir_list[-1]))
-
-    r = requests.get(URL)
+    r = requests.get(url)
     path = path + file_name
 
     if r.status_code == 200:
         output_file = open(path, 'w')
         output_file.write(r.text.encode('utf-8'))
-        folder_name = None
-        apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
+        apply_scan_async.delay(path, scan_id)
 
 @app.task
 def apply_scan_async(path, scan_id):
@@ -133,13 +118,13 @@ def save_results_to_db(scan_id, json_data):
             )
 
             for copyright_holder in a_copyright['holders']:
-                insert_into_db.insert_into_copyright_holders(
+                insert_into_db.insert_into_copyright_holder(
                     copyright = copyright,
                     holder = copyright_holder
                 )
 
             for copyright_statement in a_copyright['statements']:
-                insert_into_db.insert_into_copyright_statements(
+                insert_into_db.insert_into_copyright_statement(
                     copyright = copyright,
                     statement = copyright_statement
                 )

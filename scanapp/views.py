@@ -22,6 +22,7 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 import json
+import os
 from datetime import datetime
 
 from django.core.files.storage import FileSystemStorage
@@ -70,16 +71,17 @@ class LocalUploadView(FormView):
                 path = 'media/user/' + str(request.user) + '/' + str(filename)
                 user = request.user
 
-            code_dir_name = filename
+            scan_directory = filename
+            # FIXME we need to put the url of localupload file equal to its absolute url. file:///xxx
             url = None
             scan_start_time = datetime.now()
-            scan_id = insert_into_db.create_scan_id(user, url, scan_directory=code_dir_name, scan_start_time=scan_start_time)
+            scan_id = insert_into_db.create_scan_id(user, url, scan_directory, scan_start_time)
             apply_scan_async.delay(path, scan_id)
 
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
 
-class URLFormViewCelery(FormView):
+class UrlScanView(FormView):
     template_name = 'scanapp/urlscan.html'
     form_class = UrlScanForm
 
@@ -87,25 +89,32 @@ class URLFormViewCelery(FormView):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            # get the URL from the form
             url = request.POST['url']
-
-            scan_type = 'URL'
-            # Create an Instance of InsertIntoDB
             insert_into_db = InsertIntoDB()
-
-            # call the create_scan_id function
-            scan_id = insert_into_db.create_scan_id(scan_type)
 
             # different paths for both anonymous and registered users
             if (str(request.user) == 'AnonymousUser'):
-                path = 'media/AnonymousUser/URL/'
-
+                path = 'media/AnonymousUser/url/'
+                user = None
             else:
-                path = 'media/user/' + str(request.user) + '/URL/'
+                path = 'media/user/' + str(request.user) + '/url/'
+                user = request.user
+            scan_start_time = datetime.now()
 
-            scan_code_async.delay(URL, scan_id, path)
-            # return the response as HttpResponse
+            # logic to check how many files are already present for the scan
+            dir_list = list()
+            dir_list = os.listdir(path)
+            file_name = ''
+
+            if len(dir_list) == 0:
+                file_name = '1'
+            else:
+                dir_list.sort()
+                file_name = str(1 + int(dir_list[-1]))
+
+            scan_directory = file_name
+            scan_id = insert_into_db.create_scan_id(user, url, scan_directory, scan_start_time)
+            scan_code_async.delay(url, scan_id, path, file_name)
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
 
