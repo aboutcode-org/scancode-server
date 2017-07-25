@@ -27,21 +27,14 @@ import json
 import os
 import subprocess
 import requests
+from datetime import datetime
 
-from scanapp.models import CeleryScan
-from scanapp.models import ScanInfo
-from scanapp.models import UserInfo
-from scanapp.models import URLScanInfo
-from scanapp.models import LocalScanInfo
-from scanapp.models import CodeInfo
-from scanapp.models import ScanResult
-from scanapp.models import ScanFileInfo
+from scanapp.models import Scan
+from scanapp.models import ScannedFile
 from scanapp.models import License
-from scanapp.models import MatchedRule
-from scanapp.models import MatchedRuleLicenses
 from scanapp.models import Copyright
-from scanapp.models import CopyrightHolders
-from scanapp.models import CopyrightStatements
+from scanapp.models import CopyrightHolder
+from scanapp.models import CopyrightStatement
 from scanapp.models import CopyrightAuthor
 from scanapp.models import Package
 from scanapp.models import ScanError
@@ -55,6 +48,8 @@ def scan_code_async(URL, scan_id, path):
     and apply the scan.
     """
     scan_type = 'URL'
+
+    # logic to check how many files are already present for the scan
     dir_list = list()
     dir_list = os.listdir(path)
 
@@ -75,7 +70,7 @@ def scan_code_async(URL, scan_id, path):
         apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
 
 @app.task
-def apply_scan_async(path, scan_id, scan_type, URL, folder_name):
+def apply_scan_async(path, scan_id):
     """
     Run a scancode scan on the files at `path` for `scan_id`, `scan_type`, `URL`, `folder_name`
     and save results in the database.
@@ -83,93 +78,56 @@ def apply_scan_async(path, scan_id, scan_type, URL, folder_name):
     # FIXME improve error checking when calling scan in subprocess.
     scan_result = subprocess.check_output(['scancode', path])
     json_data = json.loads(scan_result)
-    save_results_to_db.delay(scan_id, json_data, scan_type, URL, folder_name)
+    save_results_to_db.delay(scan_id, json_data)
 
 @app.task
-def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
+def save_results_to_db(scan_id, json_data):
     """
     Fill database using `json_data`, `scan_type`, `URL`, `folder_name` for given `scan_id`
     and change `is_complete` to true.
     """
     insert_into_db = InsertIntoDB()
-    scan_info = ScanInfo.objects.get(pk=scan_id)
-    code_info = insert_into_db.insert_into_code_info(
-        scan_info = scan_info,
-        total_code_files = json_data['files_count'],
-        code_size = 4096,
-    )
-
-    if(scan_type == 'URL'):
-        insert_into_db.insert_into_url_scan_info(
-            scan_info = scan_info,
-            # FIXME get the URL from the filled form
-            URL = URL
-        )
-
-    elif(scan_type == 'localscan'):
-        insert_into_db.insert_into_local_scan_info(
-            scan_info = scan_info,
-            # FIXME get the foldername from the filled form
-            folder_name = folder_name
-        )
-
-    # calculate total scan errors
-    total_errors = 0
-    for a_file in json_data['files']:
-        for error in a_file['scan_errors']:
-            total_errors = total_errors + 1
-
-    scan_result = insert_into_db.insert_into_save_results(
-        code_info = code_info,
-        scanned_json_result = json_data,
-        scanned_html_result = '<h4>' + str(json.dumps(json_data)) + '</h4>',
+    scan = Scan.objects.get(pk=scan_id)
+    scan = insert_into_db.fill_unfilled_scan_model(
+        scan = scan,
+        files_count = json_data['files_count'],
         scancode_notice = json_data['scancode_notice'],
         scancode_version = json_data['scancode_version'],
-        files_count = json_data['files_count'],
-        total_errors = total_errors,
-        scan_time = 5000,
     )
 
-    # create scan_file_info for every new file path that comes our way
+# logic to calculate total_error
+#    total_errors = 0
+#    for a_file in json_data['files']:
+#        for error in a_file['scan_errors']:
+#            total_errors = total_errors + 1
+
     for a_file in json_data['files']:
-        scan_file_info = insert_into_db.insert_into_scan_file_info(
-            scan_result = scan_result,
-            file_path = a_file['path']
+        scanned_file = insert_into_db.insert_into_scanned_file(
+            scan = scan,
+            path = a_file['path']
         )
 
         for a_license in a_file['licenses']:
             license = insert_into_db.insert_into_license(
-                scan_file_info = scan_file_info,
-                category = a_license['category'],
-                start_line = a_license['start_line'],
-                spdx_url = a_license['spdx_url'],
-                text_url = a_license['text_url'],
-                spdx_license_key = a_license['spdx_license_key'],
-                homepage_url = a_license['homepage_url'],
-                score = a_license['score'],
-                end_line = a_license['end_line'],
+                scanned_file = scanned_file,
                 key = a_license['key'],
+                score = a_license['score'],
+                short_name = a_license['short_name'],
+                category = a_license['category'],
                 owner = a_license['owner'],
+                homepage_url = a_license['homepage_url'],
+                text_url = a_license['text_url'],
                 dejacode_url = a_license['dejacode_url'],
+                spdx_license_key = a_license['spdx_license_key'],
+                spdx_url = a_license['spdx_url'],
+                start_line = a_license['start_line'],
+                end_line = a_license['end_line'],
+                matched_rule = a_license['matched_rule']
             )
-
-            a_matched_rule = a_license['matched_rule']
-            matched_rule = insert_into_db.insert_into_matched_rule(
-                license = license,
-                license_choice = a_matched_rule['license_choice'],
-                identifier = a_matched_rule['identifier']
-            )
-
-            matched_rule_licenses = a_matched_rule['licenses']
-            for a_matched_rule_license in matched_rule_licenses:
-                insert_into_db.insert_into_matched_rule_licenses(
-                    matched_rule = matched_rule,
-                    a_license = a_matched_rule_license
-                )
 
         for a_copyright in a_file['copyrights']:
             copyright = insert_into_db.insert_into_copyright(
-                scan_file_info = scan_file_info,
+                scanned_file = scanned_file,
                 start_line = a_copyright['start_line'],
                 end_line = a_copyright['end_line']
             )
@@ -194,118 +152,81 @@ def save_results_to_db(scan_id, json_data, scan_type, URL, folder_name):
 
         for a_package in a_file['packages']:
             insert_into_db.insert_into_package(
-                scan_file_info = scan_file_info,
+                scanned_file = scanned_file,
                 package = a_package
             )
 
         for a_scan_error in a_file['scan_errors']:
             insert_into_db.insert_into_scan_error(
-                scan_file_info = scan_file_info,
+                scanned_file = scanned_file,
                 scan_error = a_scan_error
             )
 
-    scan_info.is_complete = True
-    scan_info.save()
+    scan.scan_end_time = datetime.now()
+    scan.save()
 
 class InsertIntoDB(object):
     def __init__(self):
         pass
 
-    def create_scan_id(self, scan_type):
+    def create_scan_id(self, user, url, scan_directory, scan_start_time):
         """
         Create the `scan_id` for an applied scan using `scan_type`
         and returns the `scan_id`.
         """
-        scan_info = ScanInfo(scan_type=scan_type, is_complete=False)
-        scan_info.save()
-        scan_id = scan_info.id
+        scan = Scan(user=user, url=url, scan_directory=scan_directory, scan_start_time=scan_start_time)
+        scan.save()
+        scan_id = scan.id
         return scan_id
 
-    def insert_into_code_info(self, scan_info, total_code_files, code_size):
+    def fill_unfilled_scan_model(self, scan, files_count, scancode_notice, scancode_version):
         """
-        Add `total_code_files` and `code_size` into model `CodeInfo` using `scan_info`
-        and return `code_info`
+        Fill the rest of the `Scan` model
+        Half of the model is filled by `create_scan_id` method
         """
-        code_info = CodeInfo(
-            scan_info = scan_info,
-            total_code_files = total_code_files,
-            code_size = code_size
-        )
-        code_info.save()
+        scan.files_count = files_count
+        scan.scancode_notice = scancode_notice
+        scan.scancode_version = scancode_version
+        scan.save()
+        return scan
 
-        return code_info
-
-    def insert_into_url_scan_info(self, scan_info, URL):
+    def insert_into_scanned_file(self, scan, path):
         """
-        Add `URL` into `URLScanInfo` using `scan_info`
-        """
-        URL_scan_info = URLScanInfo(scan_info=scan_info, URL=URL)
-        URL_scan_info.save()
-
-    def insert_into_local_scan_info(self, scan_info, folder_name):
-        """
-        Add `folder_name` into `LocalScanInfo` using `scan_info`
-        """
-        local_scan_info = LocalScanInfo(scan_info=scan_info, folder_name=folder_name)
-        local_scan_info.save()
-
-    def insert_into_save_results(self, code_info, scanned_json_result, scanned_html_result, scancode_notice, scancode_version, files_count, total_errors, scan_time):
-        """
-        Add `scanned_json_result`, `scanned_html_result`, `scancode_notice`, `scancode_version`, `files_count`, `total_errors`, `scan_time` into `ScanResult` using `code_info`
-        and return `scan_result`
+        Add `file_path into `ScannedFile` using `scan_result`
+        and return `scanned_file`.
         """
         try:
-            scan_result = ScanResult(
-                code_info = code_info,
-                scanned_json_result = scanned_json_result,
-                scanned_html_result = scanned_html_result,
-                scancode_notice = scancode_notice,
-                scancode_version = scancode_version,
-                files_count = files_count,
-                total_errors = total_errors,
-                scan_time = scan_time
+            scanned_file = ScannedFile(
+                scan = scan,
+                path = path
             )
-            scan_result.save()
-            return scan_result
+            scanned_file.save()
+            return scanned_file
 
         except:
-            print 'Unable to put data into the database SaveResult'
+            print 'Database error at ScannedFile'
 
-    def insert_into_scan_file_info(self, scan_result, file_path):
+    def insert_into_license(self, scanned_file, key, score, short_name, category, owner, homepage_url, text_url, dejacode_url, spdx_license_key, spdx_url, start_line, end_line, matched_rule):
         """
-        Add `file_path into `ScanFileInfo` using `scan_result`
-        and return `scan_file_info`.
-        """
-        try:
-            scan_file_info = ScanFileInfo(
-                scan_result = scan_result,
-                file_path = file_path
-            )
-            scan_file_info.save()
-            return scan_file_info
-
-        except:
-            print 'Database error at ScanFileInfo'
-
-    def insert_into_license(self, scan_file_info, category, start_line, spdx_url, text_url, spdx_license_key, homepage_url, score, end_line, key, owner, dejacode_url):
-        """
-        Add `category`, `start_line`, `spdx_url`, `text_url`, `spdx_license_key`, `homepage_url`, `score`, `end_line`, `key`, `owner`, `dejacode_url` into `License` model using `scan_file_info`
+        Add `category`, `start_line`, `spdx_url`, `text_url`, `spdx_license_key`, `homepage_url`, `score`, `end_line`, `key`, `owner`, `dejacode_url` into `License` model using `scanned_file`
         and return `license`.
         """
         try:
             license = License(
-                scan_file_info = scan_file_info,
-                category = category,
-                start_line = start_line,
-                spdx_url = spdx_url,
-                text_url = text_url,
-                spdx_license_key = spdx_license_key,
-                homepage_url = homepage_url,
-                score = score,
-                end_line = end_line,
+                scanned_file = scanned_file,
                 key = key,
+                score = score,
+                short_name = short_name,
+                category = category,
                 owner = owner,
-                dejacode_url = dejacode_url
+                homepage_url = homepage_url,
+                text_url = text_url,
+                dejacode_url = dejacode_url,
+                spdx_license_key = spdx_license_key,
+                spdx_url = spdx_url,
+                start_line = start_line,
+                end_line = end_line,
+                matched_rule = matched_rule
             )
             license.save()
             return license
@@ -313,45 +234,14 @@ class InsertIntoDB(object):
         except:
             print('Database error at model License')
 
-    def insert_into_matched_rule(self, license, license_choice, identifier):
+    def insert_into_copyright(self, scanned_file, start_line, end_line):
         """
-        Add `license_choice`, `identifier` into model `MatchedRule` using `license` 
-        and return `matched_rule`.
-        """
-        try:
-            matched_rule = MatchedRule(
-                license = license,
-                license_choice = license_choice,
-                identifier = identifier
-            )
-            matched_rule.save()
-            return matched_rule
-
-        except:
-            print('Database error at model MatchedRule')
-
-    def insert_into_matched_rule_licenses(self, matched_rule, a_license):
-        """
-        Add `a_license` into model `MatchedRuleLicenses` using `matched_rule`
-        """
-        try:
-            matched_rule_licenses = MatchedRuleLicenses(
-                matched_rule = matched_rule,
-                license = a_license
-            )
-            matched_rule_licenses.save()
-
-        except:
-            print('Database error at model matchedRuleLicense')
-
-    def insert_into_copyright(self, scan_file_info, start_line, end_line):
-        """
-        Add `start_line`, `end_line` into model `Copyright` using `scan_file_info`
+        Add `start_line`, `end_line` into model `Copyright` using `scanned_file`
         and return `copyright`
         """
         try:
             copyright = Copyright(
-                scan_file_info = scan_file_info,
+                scanned_file = scanned_file,
                 start_line = start_line,
                 end_line = end_line
             )
@@ -361,12 +251,12 @@ class InsertIntoDB(object):
         except:
             print('Database error at model Copyright')
 
-    def insert_into_copyright_holders(self, copyright, holder):
+    def insert_into_copyright_holder(self, copyright, holder):
         """
-        Add copyright `holder` into model `CopyrightHolders` using `copyright`
+        Add copyright `holder` into model `CopyrightHolder` using `copyright`
         """
         try:
-            copyright_holder = CopyrightHolders(
+            copyright_holder = CopyrightHolder(
                 copyright = copyright,
                 holder = holder
             )
@@ -375,19 +265,19 @@ class InsertIntoDB(object):
         except:
             print('Database error at model CopyrightHolder')
 
-    def insert_into_copyright_statements(self, copyright, statement):
+    def insert_into_copyright_statement(self, copyright, statement):
         """
-        Add copyright `statement` into model `CopyrightStatements` using `copyright`
+        Add copyright `statement` into model `CopyrightStatement` using `copyright`
         """
         try:
-            copyright_statements = CopyrightStatements(
+            copyright_statement = CopyrightStatement(
                 copyright = copyright,
                 statement = statement
             )
-            copyright_statements.save()
+            copyright_statement.save()
 
         except:
-            print('Database error at model CopyrightStatements')
+            print('Database error at model CopyrightStatement')
 
     def insert_into_copyright_author(self, copyright, author):
         """
@@ -403,13 +293,13 @@ class InsertIntoDB(object):
         except:
             print('Database error at model CopyrightAuthor')
 
-    def insert_into_Package(self, scan_file_info, package):
+    def insert_into_Package(self, scanned_file, package):
         """
-        Add `package` into model `Package` using `scan_file_info`
+        Add `package` into model `Package` using `scanned_file`
         """
         try:
             package = Package(
-                scan_file_info = scan_file_info,
+                scanned_file = scanned_file,
                 package = package
             )
             package.save()
@@ -417,13 +307,13 @@ class InsertIntoDB(object):
         except:
             print 'Database error at model Package'
 
-    def insert_into_scan_error(self, scan_file_info, scan_error):
+    def insert_into_scan_error(self, scanned_file, scan_error):
         """
-        Add `scan_error` into model `ScanError` using `scan_file_info`
+        Add `scan_error` into model `ScanError` using `scanned_file`
         """
         try:
             scan_error = ScanError(
-                scan_file_info = scan_file_info,
+                scanned_file = scanned_file,
                 scan_error = scan_error
             )
             scan_error.save()

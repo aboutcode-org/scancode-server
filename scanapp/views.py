@@ -21,7 +21,9 @@
 #  scancode-server is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
-# To store the files on the server we use this import
+import json
+from datetime import datetime
+
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -29,24 +31,25 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
 from scanapp.forms import LocalScanForm
-from scanapp.forms import URLScanForm
-from scanapp.models import CodeInfo
-from scanapp.models import ScanInfo
-from scanapp.models import ScanResult
+from scanapp.forms import UrlScanForm
+from scanapp.models import Scan
 from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
 
 from django.views.decorators.csrf import csrf_exempt
-from . import models
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse
-import json
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
 
 class LocalUploadView(FormView):
+    """
+    Handles everything for applyig scan by uploading files from local
+    like saving files at right place, Updating database and showing
+    file upload forms
+    """
     template_name = 'scanapp/localupload.html'
     form_class = LocalScanForm
 
@@ -57,43 +60,37 @@ class LocalUploadView(FormView):
             f = request.FILES['upload_from_local']
             fs = FileSystemStorage('media/AnonymousUser/')
             filename = fs.save(f.name, f)
-
-            scan_type = 'localscan'
-
-            # Create an Instance of InsertIntoDB
             insert_into_db = InsertIntoDB()
 
-            # call the create_scan_id function
-            scan_id = insert_into_db.create_scan_id(scan_type)
-
-            # different paths for both anonymous and registered users
             if (str(request.user) == 'AnonymousUser'):
                 path = 'media/AnonymousUser/' + str(filename)
+                user = None
 
             else:
                 path = 'media/user/' + str(request.user) + '/' + str(filename)
-            folder_name = filename,
-            URL = None
-            # call the celery function to apply the scan
-            apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
+                user = request.user
 
-            # return the response as HttpResponse
+            code_dir_name = filename
+            url = None
+            scan_start_time = datetime.now()
+            scan_id = insert_into_db.create_scan_id(user, url, scan_directory=code_dir_name, scan_start_time=scan_start_time)
+            apply_scan_async.delay(path, scan_id)
+
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
 
 class URLFormViewCelery(FormView):
     template_name = 'scanapp/urlscan.html'
-    form_class = URLScanForm
+    form_class = UrlScanForm
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
 
         if form.is_valid():
             # get the URL from the form
-            URL = request.POST['URL']
+            url = request.POST['url']
 
             scan_type = 'URL'
-
             # Create an Instance of InsertIntoDB
             insert_into_db = InsertIntoDB()
 
@@ -116,13 +113,10 @@ class ScanResults(TemplateView):
     template_name = 'scanapp/scanresult.html'
 
     def get(self, request, *args, **kwargs):
-        # celery_scan = CeleryScan.objects.get(scan_id=kwargs['pk'])
-        scan_info = ScanInfo.objects.get(pk=kwargs['pk'])
+        scan = Scan.objects.get(pk=kwargs['pk'])
         result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
-        if scan_info.is_complete == True:
-            code_info = CodeInfo.objects.get(scan_info=scan_info)
-            scan_result = ScanResult.objects.get(code_info=code_info)
-            result = scan_result.scanned_json_result
+        if scan.scan_end_time is not None:
+            result = 'Let me show it in api later'
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
 
