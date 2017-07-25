@@ -43,17 +43,16 @@ class Scan(models.Model):
     Store various attributes of a scan
     """
     def __str__(self):
-        return self.scan_type
+        return self.scan_directory
 
-    is_complete = models.BooleanField(default=False, help='True if the scan is completed by celery and result are stored')
-    user = models.ForeignKey(User, blank=True, null=True, help='logged in user')
-    url = models.URLField(max_length=2000, blank=True, null=True, help='url from where the code is fetched')
-    scan_directory = models.CharField(max_length=200, help='directory or file in which the code is stored')
-    scancode_notice = models.CharField(max_length=2000, blank=True, null=True, help='notice by the scancode-toolkit')
-    scancode_version = models.CharField(max_length=200, blank=True, null=True, help='version of scancode being used')
-    files_count = models.IntegerField(null=True, blank=True, default=0, help='number of files under scan')
-    scan_start_time = models.DateTimeField(help='time at which scan starts', blank=True, null=True)
-    scan_end_time = models.DateTimeField(help='time at which scan ends', blank=True, null=True)
+    user = models.ForeignKey(User, blank=True, null=True, help_text='Logged in user')
+    url = models.URLField(max_length=2000, blank=True, null=True, help_text='Url from where the code is fetched')
+    scan_directory = models.CharField(max_length=200, help_text='Directory or file in which the code to be scanned is stored')
+    scancode_notice = models.CharField(max_length=2000, blank=True, null=True, help_text='Notice by the scancode-toolkit')
+    scancode_version = models.CharField(max_length=200, blank=True, null=True, help_text='Version of scancode being used')
+    files_count = models.IntegerField(null=True, blank=True, default=0, help_text='Number of files under scan')
+    scan_start_time = models.DateTimeField(help_text='Time at which scan starts', blank=True, null=True)
+    scan_end_time = models.DateTimeField(help_text='Time at which scan ends', blank=True, null=True)
 
 
 class ScannedFile(models.Model):
@@ -64,7 +63,7 @@ class ScannedFile(models.Model):
         return self.file_path
 
     scan = models.ForeignKey(Scan)
-    file_path = models.CharField(max_length=400, help='path of file scanned')
+    path = models.CharField(max_length=400, help_text='Path of file scanned')
 
 
 class License(models.Model):
@@ -75,18 +74,19 @@ class License(models.Model):
         return self.key
 
     scanned_file = models.ForeignKey(ScannedFile)
-    category = models.CharField(max_length=1000, help='category of license')
-    start_line = models.IntegerField(help='start line of license')
-    end_line = models.IntegerField(help='end line of license in the file')
-    spdx_url = models.URLField(max_length=2000, help='spdx url of license')
-    text_url = models.URLField(max_length=2000, help='text url of license')
-    spdx_license_key = models.CharField(max_length=200, help='spdx license key')
-    homepage_url = models.URLField(max_length=2000, help='homepage url of license')
-    score = models.IntegerField(help='score of license')
-    key = models.CharField(max_length=200, help='key of license')
-    owner = models.CharField(max_length=500, help='owner of the license')
-    dejacode_url = models.URLField(max_length=2000, help='dejacode url of the license detected')
-    matched_rule = JSONField(help='matched rule about the license detected')
+    key = models.CharField(max_length=200, help_text='Key of license')
+    score = models.IntegerField(help_text='Score of license')
+    short_name = models.CharField(max_length= 200, help_text='Short name of the license')
+    category = models.CharField(max_length=1000, help_text='Category of license')
+    owner = models.CharField(max_length=500, help_text='Owner of the license')
+    homepage_url = models.URLField(max_length=2000, help_text='Homepage url of license')
+    text_url = models.URLField(max_length=2000, help_text='Text url of license')
+    dejacode_url = models.URLField(max_length=2000, help_text='Dejacode url of the license detected')
+    spdx_license_key = models.CharField(max_length=200, help_text='Spdx license key')
+    spdx_url = models.URLField(max_length=2000, help_text='Spdx url of license') 
+    start_line = models.IntegerField(help_text='Start line of license')
+    end_line = models.IntegerField(help_text='End line of license in the file')
+    matched_rule = JSONField(help_text='Matched rule about the license detected')
 
 
 class Copyright(models.Model):
@@ -97,41 +97,41 @@ class Copyright(models.Model):
         return str(self.start_line)
 
     scanned_file = models.ForeignKey(ScannedFile)
-    start_line = models.IntegerField(help='start line of the copyright')
-    end_line = models.IntegerField(help='end line of the copyright')
+    start_line = models.IntegerField(help_text='Start line of the copyright')
+    end_line = models.IntegerField(help_text='End line of the copyright')
 
 
 class CopyrightHolder(models.Model):
     """
-    Stores the information of the copyright holders of the code
+    Stores the information of the copyright holder of the code
     """
     def __str__(self):
         return self.holder
 
     copyright = models.ForeignKey(Copyright)
-    holder = models.CharField(max_length=400, help='copyright holders of the copyright')
+    holder = models.CharField(max_length=400, help_text='Copyright holder of the copyright')
 
 
 class CopyrightStatement(models.Model):
     """
-    Stores the information of the copyright statements in the code
+    Stores the information of the copyright statement in the code
     """
     def __str__(self):
         return self.statement
 
     copyright = models.ForeignKey(Copyright)
-    statement = models.CharField(max_length=500, help='copyright statements of the copyright')
+    statement = models.CharField(max_length=500, help_text='Copyright statement of the copyright')
 
 
 class CopyrightAuthor(models.Model):
     """
-    Stores the information of the copyright authors in the code
+    Stores the information of the copyright author in the code
     """
     def __str__(self):
         return self.author
 
     copyright = models.ForeignKey(Copyright)
-    author = models.CharField(max_length=200, help='copyright authors of the copyright')
+    author = models.CharField(max_length=200, help_text='Copyright author of the copyright')
 
 
 class Package(models.Model):
@@ -139,10 +139,10 @@ class Package(models.Model):
     Stores the package imformation present in the code
     """
     def __str__(self):
-        return self.package
+        return str(self.package)
 
     scanned_file = models.ForeignKey(ScannedFile)
-    package = JSONField(max_length=1000, help='information of the package')
+    package = JSONField(max_length=1000, help_text='Information of the package')
 
 
 class ScanError(models.Model):
@@ -153,4 +153,4 @@ class ScanError(models.Model):
         return self.scan_error
 
     scanned_file = models.ForeignKey(ScannedFile)
-    scan_error = models.CharField(max_length=1000, help='information about the scan errors')
+    scan_error = models.CharField(max_length=1000, help_text='Information about the scan errors')
