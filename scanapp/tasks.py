@@ -40,11 +40,12 @@ from scanapp.models import ScanError
 
 from scanapp.celery import app
 
+
 @app.task
 def scan_code_async(url, scan_id, path, file_name):
     """
-    Create and save a file at `path` present at `URL` using `scan_id` and bare `path`
-    and apply the scan.
+    Create and save a file at `path` present at `url` using `scan_id` and bare `path` and
+    `file_name` and apply the scan.
     """
     r = requests.get(url)
     path = path + file_name
@@ -54,10 +55,11 @@ def scan_code_async(url, scan_id, path, file_name):
         output_file.write(r.text.encode('utf-8'))
         apply_scan_async.delay(path, scan_id)
 
+
 @app.task
 def apply_scan_async(path, scan_id):
     """
-    Run a scancode scan on the files at `path` for `scan_id`, `scan_type`, `URL`, `folder_name`
+    Run a scancode scan on the files at `path` for `scan_id`
     and save results in the database.
     """
     # FIXME improve error checking when calling scan in subprocess.
@@ -65,19 +67,20 @@ def apply_scan_async(path, scan_id):
     json_data = json.loads(scan_result)
     save_results_to_db.delay(scan_id, json_data)
 
+
 @app.task
 def save_results_to_db(scan_id, json_data):
     """
-    Fill database using `json_data`, `scan_type`, `URL`, `folder_name` for given `scan_id`
-    and change `is_complete` to true.
+    Fill database using `json_data` for given `scan_id`
+    and add `end_scan_time` to true.
     """
     insert_into_db = InsertIntoDB()
     scan = Scan.objects.get(pk=scan_id)
     scan = insert_into_db.fill_unfilled_scan_model(
-        scan = scan,
-        files_count = json_data['files_count'],
-        scancode_notice = json_data['scancode_notice'],
-        scancode_version = json_data['scancode_version'],
+        scan=scan,
+        files_count=json_data['files_count'],
+        scancode_notice=json_data['scancode_notice'],
+        scancode_version=json_data['scancode_version'],
     )
 
 # logic to calculate total_error
@@ -88,63 +91,63 @@ def save_results_to_db(scan_id, json_data):
 
     for a_file in json_data['files']:
         scanned_file = insert_into_db.insert_into_scanned_file(
-            scan = scan,
-            path = a_file['path']
+            scan=scan,
+            path=a_file['path']
         )
 
         for a_license in a_file['licenses']:
             license = insert_into_db.insert_into_license(
-                scanned_file = scanned_file,
-                key = a_license['key'],
-                score = a_license['score'],
-                short_name = a_license['short_name'],
-                category = a_license['category'],
-                owner = a_license['owner'],
-                homepage_url = a_license['homepage_url'],
-                text_url = a_license['text_url'],
-                dejacode_url = a_license['dejacode_url'],
-                spdx_license_key = a_license['spdx_license_key'],
-                spdx_url = a_license['spdx_url'],
-                start_line = a_license['start_line'],
-                end_line = a_license['end_line'],
-                matched_rule = a_license['matched_rule']
+                scanned_file=scanned_file,
+                key=a_license['key'],
+                score=a_license['score'],
+                short_name=a_license['short_name'],
+                category=a_license['category'],
+                owner=a_license['owner'],
+                homepage_url=a_license['homepage_url'],
+                text_url=a_license['text_url'],
+                dejacode_url=a_license['dejacode_url'],
+                spdx_license_key=a_license['spdx_license_key'],
+                spdx_url=a_license['spdx_url'],
+                start_line=a_license['start_line'],
+                end_line=a_license['end_line'],
+                matched_rule=a_license['matched_rule']
             )
 
         for a_copyright in a_file['copyrights']:
             copyright = insert_into_db.insert_into_copyright(
-                scanned_file = scanned_file,
-                start_line = a_copyright['start_line'],
-                end_line = a_copyright['end_line']
+                scanned_file=scanned_file,
+                start_line=a_copyright['start_line'],
+                end_line=a_copyright['end_line']
             )
 
             for copyright_holder in a_copyright['holders']:
                 insert_into_db.insert_into_copyright_holder(
-                    copyright = copyright,
-                    holder = copyright_holder
+                    copyright=copyright,
+                    holder=copyright_holder
                 )
 
             for copyright_statement in a_copyright['statements']:
                 insert_into_db.insert_into_copyright_statement(
-                    copyright = copyright,
-                    statement = copyright_statement
+                    copyright=copyright,
+                    statement=copyright_statement
                 )
 
             for copyright_author in a_copyright['authors']:
                 insert_into_db.insert_into_copyright_author(
-                    copyright = copyright,
-                    author = copyright_author
+                    copyright=copyright,
+                    author=copyright_author
                 )
 
         for a_package in a_file['packages']:
             insert_into_db.insert_into_package(
-                scanned_file = scanned_file,
-                package = a_package
+                scanned_file=scanned_file,
+                package=a_package
             )
 
         for a_scan_error in a_file['scan_errors']:
             insert_into_db.insert_into_scan_error(
-                scanned_file = scanned_file,
-                scan_error = a_scan_error
+                scanned_file=scanned_file,
+                scan_error=a_scan_error
             )
 
     scan.scan_end_time = datetime.now()
@@ -156,10 +159,16 @@ class InsertIntoDB(object):
 
     def create_scan_id(self, user, url, scan_directory, scan_start_time):
         """
-        Create the `scan_id` for an applied scan using `scan_type`
+        Create the `scan_id` for an applied scan using `user`, `url`, `scan_directory` and
+        `scan_start_time`
         and returns the `scan_id`.
         """
-        scan = Scan(user=user, url=url, scan_directory=scan_directory, scan_start_time=scan_start_time)
+        scan = Scan(
+            user=user,
+            url=url,
+            scan_directory=scan_directory,
+            scan_start_time=scan_start_time
+        )
         scan.save()
         scan_id = scan.id
         return scan_id
@@ -177,13 +186,13 @@ class InsertIntoDB(object):
 
     def insert_into_scanned_file(self, scan, path):
         """
-        Add `file_path into `ScannedFile` using `scan_result`
+        Add `path` into `ScannedFile` using `scan`
         and return `scanned_file`.
         """
         try:
             scanned_file = ScannedFile(
-                scan = scan,
-                path = path
+                scan=scan,
+                path=path
             )
             scanned_file.save()
             return scanned_file
@@ -193,25 +202,27 @@ class InsertIntoDB(object):
 
     def insert_into_license(self, scanned_file, key, score, short_name, category, owner, homepage_url, text_url, dejacode_url, spdx_license_key, spdx_url, start_line, end_line, matched_rule):
         """
-        Add `category`, `start_line`, `spdx_url`, `text_url`, `spdx_license_key`, `homepage_url`, `score`, `end_line`, `key`, `owner`, `dejacode_url` into `License` model using `scanned_file`
+        Add `category`, `start_line`, `short_name`, `spdx_url`, `text_url`, `spdx_license_key`,
+        `homepage_url`, `score`, `end_line`, `key`, `owner`, `dejacode_url`
+        into `License` model using `scanned_file`
         and return `license`.
         """
         try:
             license = License(
-                scanned_file = scanned_file,
-                key = key,
-                score = score,
-                short_name = short_name,
-                category = category,
-                owner = owner,
-                homepage_url = homepage_url,
-                text_url = text_url,
-                dejacode_url = dejacode_url,
-                spdx_license_key = spdx_license_key,
-                spdx_url = spdx_url,
-                start_line = start_line,
-                end_line = end_line,
-                matched_rule = matched_rule
+                scanned_file=scanned_file,
+                key=key,
+                score=score,
+                short_name=short_name,
+                category=category,
+                owner=owner,
+                homepage_url=homepage_url,
+                text_url=text_url,
+                dejacode_url=dejacode_url,
+                spdx_license_key=spdx_license_key,
+                spdx_url=spdx_url,
+                start_line=start_line,
+                end_line=end_line,
+                matched_rule=matched_rule
             )
             license.save()
             return license
@@ -226,9 +237,9 @@ class InsertIntoDB(object):
         """
         try:
             copyright = Copyright(
-                scanned_file = scanned_file,
-                start_line = start_line,
-                end_line = end_line
+                scanned_file=scanned_file,
+                start_line=start_line,
+                end_line=end_line
             )
             copyright.save()
             return copyright
@@ -242,8 +253,8 @@ class InsertIntoDB(object):
         """
         try:
             copyright_holder = CopyrightHolder(
-                copyright = copyright,
-                holder = holder
+                copyright=copyright,
+                holder=holder
             )
             copyright_holder.save()
 
@@ -256,8 +267,8 @@ class InsertIntoDB(object):
         """
         try:
             copyright_statement = CopyrightStatement(
-                copyright = copyright,
-                statement = statement
+                copyright=copyright,
+                statement=statement
             )
             copyright_statement.save()
 
@@ -270,8 +281,8 @@ class InsertIntoDB(object):
         """
         try:
             copyright_author = CopyrightAuthor(
-                copyright = copyright,
-                author = author
+                copyright=copyright,
+                author=author
             )
             copyright_author.save()
 
@@ -284,8 +295,8 @@ class InsertIntoDB(object):
         """
         try:
             package = Package(
-                scanned_file = scanned_file,
-                package = package
+                scanned_file=scanned_file,
+                package=package
             )
             package.save()
 
@@ -298,8 +309,8 @@ class InsertIntoDB(object):
         """
         try:
             scan_error = ScanError(
-                scanned_file = scanned_file,
-                scan_error = scan_error
+                scanned_file=scanned_file,
+                scan_error=scan_error
             )
             scan_error.save()
 

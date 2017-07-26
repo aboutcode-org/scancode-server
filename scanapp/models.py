@@ -43,7 +43,7 @@ class Scan(models.Model):
     Store various attributes of a scan
     """
     def __str__(self):
-        return self.scan_directory
+        return self.url
 
     user = models.ForeignKey(User, blank=True, null=True, help_text='Logged in user')
     url = models.URLField(max_length=2000, blank=True, null=True, help_text='Url from where the code is fetched')
@@ -76,14 +76,14 @@ class License(models.Model):
     scanned_file = models.ForeignKey(ScannedFile)
     key = models.CharField(max_length=200, help_text='Key of license')
     score = models.IntegerField(help_text='Score of license')
-    short_name = models.CharField(max_length= 200, help_text='Short name of the license')
+    short_name = models.CharField(max_length=200, help_text='Short name of the license')
     category = models.CharField(max_length=1000, help_text='Category of license')
     owner = models.CharField(max_length=500, help_text='Owner of the license')
     homepage_url = models.URLField(max_length=2000, help_text='Homepage url of license')
     text_url = models.URLField(max_length=2000, help_text='Text url of license')
     dejacode_url = models.URLField(max_length=2000, help_text='Dejacode url of the license detected')
     spdx_license_key = models.CharField(max_length=200, help_text='Spdx license key')
-    spdx_url = models.URLField(max_length=2000, help_text='Spdx url of license') 
+    spdx_url = models.URLField(max_length=2000, help_text='Spdx url of license')
     start_line = models.IntegerField(help_text='Start line of license')
     end_line = models.IntegerField(help_text='End line of license in the file')
     matched_rule = JSONField(help_text='Matched rule about the license detected')

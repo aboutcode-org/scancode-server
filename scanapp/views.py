@@ -45,6 +45,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
 
+
 class LocalUploadView(FormView):
     """
     Handles everything for applyig scan by uploading files from local
@@ -72,8 +73,7 @@ class LocalUploadView(FormView):
                 user = request.user
 
             scan_directory = filename
-            # FIXME we need to put the url of localupload file equal to its absolute url. file:///xxx
-            url = None
+            url = fs.url(filename)
             scan_start_time = datetime.now()
             scan_id = insert_into_db.create_scan_id(user, url, scan_directory, scan_start_time)
             apply_scan_async.delay(path, scan_id)
@@ -125,9 +125,10 @@ class ScanResults(TemplateView):
         scan = Scan.objects.get(pk=kwargs['pk'])
         result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
         if scan.scan_end_time is not None:
-            result = 'Let me show it in api later'
+            result = scan
 
         return render(request, 'scanapp/scanresults.html', context={'result': result})
+
 
 class LoginView(TemplateView):
     template_name = "scanapp/login.html"
