@@ -51,6 +51,7 @@ class ScanInfo(models.Model):
     scan_type = models.CharField(max_length=20, choices=scan_types, default='URL')
     is_complete = models.BooleanField()
 
+
 class UserInfo(models.Model):
     def __str__(self):
         return self.user.username
@@ -143,6 +144,7 @@ class MatchedRuleLicenses(models.Model):
 
     matched_rule = models.ForeignKey(MatchedRule)
     license = models.CharField(max_length=200)
+
 
 class Copyright(models.Model):
     def __str__(self):

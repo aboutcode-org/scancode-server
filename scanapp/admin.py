@@ -23,23 +23,22 @@
 
 from django.contrib import admin
 
-# Import models from scanapp.models
-from scanapp.models import ScanInfo
-from scanapp.models import UserInfo
-from scanapp.models import URLScanInfo
-from scanapp.models import LocalScanInfo
 from scanapp.models import CodeInfo
-from scanapp.models import ScanResult
-from scanapp.models import ScanFileInfo
-from scanapp.models import License
-from scanapp.models import MatchedRule
-from scanapp.models import MatchedRuleLicenses
 from scanapp.models import Copyright
+from scanapp.models import CopyrightAuthor
 from scanapp.models import CopyrightHolders
 from scanapp.models import CopyrightStatements
-from scanapp.models import CopyrightAuthor
+from scanapp.models import License
+from scanapp.models import LocalScanInfo
+from scanapp.models import MatchedRule
+from scanapp.models import MatchedRuleLicenses
 from scanapp.models import Package
 from scanapp.models import ScanError
+from scanapp.models import ScanFileInfo
+from scanapp.models import ScanInfo
+from scanapp.models import ScanResult
+from scanapp.models import URLScanInfo
+from scanapp.models import UserInfo
 
 # Register models from scancode.models
 admin.site.register(ScanInfo)
