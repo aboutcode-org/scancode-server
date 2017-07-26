@@ -45,14 +45,50 @@ class Scan(models.Model):
     def __str__(self):
         return self.url
 
-    user = models.ForeignKey(User, blank=True, null=True, help_text='Logged in user')
-    url = models.URLField(max_length=2000, blank=True, null=True, help_text='Url from where the code is fetched')
-    scan_directory = models.CharField(max_length=200, help_text='Directory or file in which the code to be scanned is stored')
-    scancode_notice = models.CharField(max_length=2000, blank=True, null=True, help_text='Notice by the scancode-toolkit')
-    scancode_version = models.CharField(max_length=200, blank=True, null=True, help_text='Version of scancode being used')
-    files_count = models.IntegerField(null=True, blank=True, default=0, help_text='Number of files under scan')
-    scan_start_time = models.DateTimeField(help_text='Time at which scan starts', blank=True, null=True)
-    scan_end_time = models.DateTimeField(help_text='Time at which scan ends', blank=True, null=True)
+    user = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        help_text='Logged in user'
+    )
+    url = models.URLField(
+        max_length=2000,
+        blank=True,
+        null=True,
+        help_text='Url from where the code is fetched'
+    )
+    scan_directory = models.CharField(
+        max_length=200,
+        help_text='Directory or file in which the code to be scanned is stored'
+    )
+    scancode_notice = models.CharField(
+        max_length=2000,
+        blank=True,
+        null=True,
+        help_text='Notice by the scancode-toolkit'
+    )
+    scancode_version = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='Version of scancode being used'
+    )
+    files_count = models.IntegerField(
+        null=True,
+        blank=True,
+        default=0,
+        help_text='Number of files under scan'
+    )
+    scan_start_time = models.DateTimeField(
+        help_text='Time at which scan starts',
+        blank=True,
+        null=True
+    )
+    scan_end_time = models.DateTimeField(
+        help_text='Time at which scan ends',
+        blank=True,
+        null=True
+    )
 
 
 class ScannedFile(models.Model):
@@ -60,7 +96,7 @@ class ScannedFile(models.Model):
     Store path of every file being scanned
     """
     def __str__(self):
-        return self.file_path
+        return self.path
 
     scan = models.ForeignKey(Scan)
     path = models.CharField(max_length=400, help_text='Path of file scanned')
@@ -81,7 +117,7 @@ class License(models.Model):
     owner = models.CharField(max_length=500, help_text='Owner of the license')
     homepage_url = models.URLField(max_length=2000, help_text='Homepage url of license')
     text_url = models.URLField(max_length=2000, help_text='Text url of license')
-    dejacode_url = models.URLField(max_length=2000, help_text='Dejacode url of the license detected')
+    dejacode_url = models.URLField(max_length=2000, help_text='Dejacode url of detected license')
     spdx_license_key = models.CharField(max_length=200, help_text='Spdx license key')
     spdx_url = models.URLField(max_length=2000, help_text='Spdx url of license')
     start_line = models.IntegerField(help_text='Start line of license')

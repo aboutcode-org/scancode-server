@@ -1,13 +1,12 @@
-# Create your tests here.
 import os
 import sys
+
+from django.test.utils import get_runner
+from django.conf import settings
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'
 test_dir = os.path.dirname(__file__)
 sys.path.insert(0, test_dir)
-
-from django.test.utils import get_runner
-from django.conf import settings
 
 
 def runtests():
