@@ -30,3 +30,11 @@ class URLScanForm(forms.Form):
 
 class LocalScanForm(forms.Form):
     upload_from_local = forms.FileField(label='Upload from Local')
+
+
+class UrlSpecialScanForm(forms.Form):
+    URL = forms.URLField(label='Special URL', max_length=2000)
+
+
+class UrlForm(forms.Form):
+    URL = forms.URLField(label='URL View', max_length=2000)
