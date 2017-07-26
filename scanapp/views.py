@@ -33,8 +33,10 @@ from django.views.generic.edit import FormView
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
+
 from scanapp.models import Scan
-from scanapp.tasks import InsertIntoDB
+
+from scanapp.tasks import create_scan_id
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
 
@@ -62,7 +64,6 @@ class LocalUploadView(FormView):
             f = request.FILES['upload_from_local']
             fs = FileSystemStorage('media/AnonymousUser/')
             filename = fs.save(f.name, f)
-            insert_into_db = InsertIntoDB()
 
             if (str(request.user) == 'AnonymousUser'):
                 path = 'media/AnonymousUser/' + str(filename)
@@ -75,7 +76,7 @@ class LocalUploadView(FormView):
             scan_directory = filename
             url = fs.url(filename)
             scan_start_time = datetime.now()
-            scan_id = insert_into_db.create_scan_id(user, url, scan_directory, scan_start_time)
+            scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
             apply_scan_async.delay(path, scan_id)
 
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
@@ -90,7 +91,6 @@ class UrlScanView(FormView):
 
         if form.is_valid():
             url = request.POST['url']
-            insert_into_db = InsertIntoDB()
 
             # different paths for both anonymous and registered users
             if (str(request.user) == 'AnonymousUser'):
@@ -113,7 +113,7 @@ class UrlScanView(FormView):
                 file_name = str(1 + int(dir_list[-1]))
 
             scan_directory = file_name
-            scan_id = insert_into_db.create_scan_id(user, url, scan_directory, scan_start_time)
+            scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
             scan_code_async.delay(url, scan_id, path, file_name)
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
