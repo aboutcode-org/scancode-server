@@ -24,21 +24,26 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
+import logging
+import os
 import subprocess
-import requests
 from datetime import datetime
+from os.path import expanduser
+from urlparse import urlparse
 
-from scanapp.models import Scan
-from scanapp.models import ScannedFile
-from scanapp.models import License
-from scanapp.models import Copyright
-from scanapp.models import CopyrightHolder
-from scanapp.models import CopyrightStatement
-from scanapp.models import CopyrightAuthor
-from scanapp.models import Package
-from scanapp.models import ScanError
+import git
+import requests
 
 from scanapp.celery import app
+from scanapp.models import Copyright
+from scanapp.models import CopyrightAuthor
+from scanapp.models import CopyrightHolder
+from scanapp.models import CopyrightStatement
+from scanapp.models import License
+from scanapp.models import Package
+from scanapp.models import Scan
+from scanapp.models import ScanError
+from scanapp.models import ScannedFile
 
 
 @app.task
@@ -54,6 +59,39 @@ def scan_code_async(url, scan_id, path, file_name):
         output_file = open(path, 'w')
         output_file.write(r.text.encode('utf-8'))
         apply_scan_async.delay(path, scan_id)
+
+
+@app.task
+def scan_code_async_final(url, scan_id):
+    """
+    Create and save a file at `path` present at `URL` using `scan_id` and bare `path`
+    and apply the scan.
+    """
+    logger = logging.getLogger(__name__)
+    logger.info('git repo detected')
+
+    clean_url = ''.join(e for e in url if e.isalnum())
+
+    dir_name = clean_url
+
+    home_path = expanduser("~")
+
+    os.chdir(home_path)
+
+    os.mkdir(dir_name)
+
+    repo = git.Repo.init(dir_name)
+    origin = repo.create_remote('origin', url)
+    origin.fetch()
+    origin.pull(origin.refs[0].remote_head)
+
+    logger.info('Done ! Remote repository cloned')
+
+    filename = home_path + '/' + clean_url + '/'
+
+    path = filename
+
+    apply_scan_async.delay(path, scan_id)
 
 
 @app.task
@@ -82,11 +120,11 @@ def save_results_to_db(scan_id, json_data):
         scancode_version=json_data['scancode_version'],
     )
 
-# logic to calculate total_error
-#    total_errors = 0
-#    for a_file in json_data['files']:
-#        for error in a_file['scan_errors']:
-#            total_errors = total_errors + 1
+    # logic to calculate total_error
+    #    total_errors = 0
+    #    for a_file in json_data['files']:
+    #        for error in a_file['scan_errors']:
+    #            total_errors = total_errors + 1
 
     for a_file in json_data['files']:
         scanned_file = ScannedFile(
@@ -188,3 +226,15 @@ def fill_unfilled_scan_model(scan, files_count, scancode_notice, scancode_versio
     scan.scancode_version = scancode_version
     scan.save()
     return scan
+
+
+def parse_url(URL):
+    """
+        Parses the URL and checks if it's a git URL. If it is a git URL then the flag is set to 1.
+    """
+    flag = 0
+    allowed_exts = ('git')
+    url = urlparse(URL)
+    if url.path.rsplit('.', 1)[1] in allowed_exts:
+        flag = 1
+    return flag
