@@ -156,7 +156,7 @@ class RegisterView(View):
             )
         )
 
-    
+
 class URLFormViewFinal(FormView):
     template_name = 'scanapp/urlscan.html'
     form_class = UrlScanForm
