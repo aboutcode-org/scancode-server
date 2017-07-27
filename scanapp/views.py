@@ -22,30 +22,30 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 import json
+import logging
 import os
 from datetime import datetime
+from os.path import expanduser
 
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from rest_framework.authtoken.models import Token
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
-
 from scanapp.models import Scan
-
-from scanapp.tasks import create_scan_id
 from scanapp.tasks import apply_scan_async
+from scanapp.tasks import create_scan_id
+from scanapp.tasks import parse_url
 from scanapp.tasks import scan_code_async
-
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
-from django.http import HttpResponse
-from django.db import transaction
-from django.contrib.auth.models import User
-from django.views import View
+from scanapp.tasks import scan_code_async_final
 
 
 class LocalUploadView(FormView):
@@ -155,3 +155,61 @@ class RegisterView(View):
                 }
             )
         )
+
+
+class URLFormViewFinal(FormView):
+    template_name = 'scanapp/urlscan.html'
+    form_class = UrlScanForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # get the URL from the form
+            url = request.POST['url']
+
+            logger = logging.getLogger(__name__)
+
+            if parse_url(url) == 1:
+                if (str(request.user) == 'AnonymousUser'):
+                    user = None
+                else:
+                    user = request.user
+                home_path = expanduser("~")
+                clean_url = ''.join(e for e in url if e.isalnum())
+                scan_directory = home_path + '/' + clean_url + '/'
+                scan_start_time = datetime.now()
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                logger.info('git repo detected')
+
+                scan_code_async_final(url, scan_id)
+
+                # return the response as HttpResponse
+                return HttpResponseRedirect('/resultscan/' + str(scan_id))
+
+            else:
+
+                # different paths for both anonymous and registered users
+                if (str(request.user) == 'AnonymousUser'):
+                    path = 'media/AnonymousUser/url/'
+                    user = None
+                else:
+                    path = 'media/user/' + str(request.user) + '/url/'
+                    user = request.user
+                scan_start_time = datetime.now()
+
+                # logic to check how many files are already present for the scan
+                dir_list = list()
+                dir_list = os.listdir(path)
+                file_name = ''
+
+                if len(dir_list) == 0:
+                    file_name = '1'
+                else:
+                    dir_list.sort()
+                    file_name = str(1 + int(dir_list[-1]))
+
+                scan_directory = file_name
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                scan_code_async.delay(url, scan_id, path, file_name)
+                return HttpResponseRedirect('/resultscan/' + str(scan_id))
