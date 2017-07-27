@@ -24,29 +24,33 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
+import logging
 import os
 import subprocess
+from os.path import expanduser
+from urlparse import urlparse
+
+import git
 import requests
 
-from scanapp.models import CeleryScan
-from scanapp.models import ScanInfo
-from scanapp.models import UserInfo
-from scanapp.models import URLScanInfo
-from scanapp.models import LocalScanInfo
+from scanapp.celery import app
 from scanapp.models import CodeInfo
-from scanapp.models import ScanResult
-from scanapp.models import ScanFileInfo
-from scanapp.models import License
-from scanapp.models import MatchedRule
-from scanapp.models import MatchedRuleLicenses
 from scanapp.models import Copyright
+from scanapp.models import CopyrightAuthor
 from scanapp.models import CopyrightHolders
 from scanapp.models import CopyrightStatements
-from scanapp.models import CopyrightAuthor
+from scanapp.models import License
+from scanapp.models import LocalScanInfo
+from scanapp.models import MatchedRule
+from scanapp.models import MatchedRuleLicenses
 from scanapp.models import Package
 from scanapp.models import ScanError
+from scanapp.models import ScanFileInfo
+from scanapp.models import ScanInfo
+from scanapp.models import ScanResult
+from scanapp.models import URLScanInfo
 
-from scanapp.celery import app
+logger = logging.getLogger(__name__)
 
 @app.task
 def scan_code_async(URL, scan_id, path):
@@ -73,6 +77,43 @@ def scan_code_async(URL, scan_id, path):
         output_file.write(r.text.encode('utf-8'))
         folder_name = None
         apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
+
+
+@app.task
+def scan_code_async_final(URL, scan_id, scan_type):
+    """
+    Create and save a file at `path` present at `URL` using `scan_id` and bare `path`
+    and apply the scan.
+    """
+    logger.info('git repo detected')
+
+    clean_url = ''.join(e for e in URL if e.isalnum())
+
+    dir_name = clean_url
+
+    home_path = expanduser("~")
+
+    os.chdir(home_path)
+
+    os.mkdir(dir_name)
+
+    repo = git.Repo.init(dir_name)
+    origin = repo.create_remote('origin', URL)
+    origin.fetch()
+    origin.pull(origin.refs[0].remote_head)
+
+    logger.info('Done ! Remote repository cloned')
+
+    filename = home_path + '/' + clean_url + '/'
+
+    # print filename
+
+    path = filename
+
+    folder_name = None
+
+    apply_scan_async.delay(path, scan_id, scan_type, URL, folder_name)
+
 
 @app.task
 def apply_scan_async(path, scan_id, scan_type, URL, folder_name):
@@ -430,3 +471,15 @@ class InsertIntoDB(object):
 
         except:
             print 'Database error at model ScanError'
+
+
+def parse_url(URL):
+    """
+        Parses the URL and checks if it's a git URL. If it is a git URL then the flag is set to 1.
+    """
+    flag = 0
+    allowed_exts = ('git')
+    url = urlparse(URL)
+    if url.path.rsplit('.', 1)[1] in allowed_exts:
+        flag = 1
+    return flag
