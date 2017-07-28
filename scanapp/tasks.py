@@ -26,7 +26,8 @@ from __future__ import absolute_import, unicode_literals
 import json
 import subprocess
 import requests
-from datetime import datetime
+
+from django.utils import timezone
 
 from scanapp.models import Scan
 from scanapp.models import ScannedFile
@@ -157,7 +158,7 @@ def save_results_to_db(scan_id, json_data):
             )
             scan_error.save()
 
-    scan.scan_end_time = datetime.now()
+    scan.scan_end_time = timezone.now()
     scan.save()
 
 
