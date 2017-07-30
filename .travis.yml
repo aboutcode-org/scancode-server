@@ -8,6 +8,9 @@ install:
 before_script:
   - pycodestyle --exclude=migrations,settings.py,lib,tests,tmp --max-line-length=100 .
 
+script:
+  - python manage.py test
+
 notifications:
   webhooks:
     urls:
