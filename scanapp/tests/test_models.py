@@ -22,20 +22,20 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 import json
-from django.utils import timezone
-
-from django.test import TestCase
 
 from django.contrib.auth.models import User
-from scanapp.models import Scan
-from scanapp.models import ScannedFile
-from scanapp.models import License
+from django.test import TestCase
+from django.utils import timezone
+
 from scanapp.models import Copyright
+from scanapp.models import CopyrightAuthor
 from scanapp.models import CopyrightHolder
 from scanapp.models import CopyrightStatement
-from scanapp.models import CopyrightAuthor
+from scanapp.models import License
 from scanapp.models import Package
+from scanapp.models import Scan
 from scanapp.models import ScanError
+from scanapp.models import ScannedFile
 
 
 class ScanTestCase(TestCase):

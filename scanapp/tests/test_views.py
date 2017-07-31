@@ -21,17 +21,16 @@
 #  scancode-server is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import User
 from django.core.files import File
-from django.test import TestCase
 from django.test import RequestFactory
+from django.test import TestCase
 
 from scanapp.views import LocalUploadView
-from scanapp.views import UrlScanView
-from scanapp.views import ScanResults
 from scanapp.views import LoginView
-
-from django.contrib.auth.models import User
-from django.contrib.auth.models import AnonymousUser
+from scanapp.views import ScanResults
+from scanapp.views import UrlScanView
 
 
 class UrlScanViewTestCase(TestCase):
@@ -101,13 +100,6 @@ class LocalUploadViewTestCase(TestCase):
         response = LocalUploadView.as_view()(request)
         self.assertEqual(302, response.status_code)
 
-#    def test_local_upload_view_anonymous_user_wrong_post_request(self):
-#        request = RequestFactory().post('/localscan/', {'upload_from_local': File(open('manapy', 'r'))})
-#        #FIXME gives file doesn't exist error
-#        request.user = AnonymousUser()
-#        response = LocalUploadView.as_view()(request)
-#        self.assertIsNone(response)
-
     def test_local_upload_view_anonymous_user_blank_post_request(self):
         request = RequestFactory().post('/localscan/')
         request.user = AnonymousUser()
@@ -175,17 +167,3 @@ class LoginViewTestCase(TestCase):
         request.user = AnonymousUser()
         response = LoginView.as_view()(request)
         self.assertEqual(200, response.status_code)
-
-#    def test_login_view_registered_user_get_request(self):
-#        user = User.objects.create_user(username='Username', password='Password')
-#        request = RequestFactory().get('/login')
-#        request.user = user
-#        response = LoginView.as_view()(request)
-#        #FIXME login_view must not be accesible to logged in user and it should redirect
-#        self.assertEqual(302, response.status_code)
-#
-#    def test_login_view_anonymous_user_post_request(self):
-#        user = User.objects.create_user(username='username', password='password')
-#        request = RequestFactory().post('/login', {'username': 'username', 'password': 'password'})
-#        response = LoginView.as_view()(request)
-#        self.assertEqual(str(response.context['user']), 'username')

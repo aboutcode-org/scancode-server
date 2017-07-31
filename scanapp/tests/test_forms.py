@@ -21,12 +21,12 @@
 #  scancode-server is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
-from django.test import TestCase
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.test import TestCase
 
-from scanapp.forms import UrlScanForm
 from scanapp.forms import LocalScanForm
+from scanapp.forms import UrlScanForm
 
 class UrlScanFormTestCase(TestCase):
     def test_correct_url_scan_form(self):
@@ -44,18 +44,3 @@ class UrlScanFormTestCase(TestCase):
         empty_form_data = {'url': ''}
         empty_url_scan_form = UrlScanForm(data=empty_form_data)
         self.assertFalse(empty_url_scan_form.is_valid())
-
-#class LocalScanFormTestCase(TestCase):
-#    def test_local_scan_form(self):
-#        a_file = InMemoryUploadedFile('name', 'local', 'name.txt', 400, 'application/json', 'utf-8', 'no extra')
-#        correct_form_data = {'upload_from_local': a_file}
-#        wrong_form_data = {'upload_from_local': 'not a path'}
-#        empty_form_data = {'upload_from_local': ''}
-#        correct_local_scan_form = LocalScanForm(data=correct_form_data)
-#        wrong_local_scan_form = LocalScanForm(data=wrong_form_data)
-#        empty_local_scan_form = LocalScanForm(data=empty_form_data)
-#        self.assertEqual('name.txt', str(a_file))
-#        self.assertTrue(correct_local_scan_form.is_valid())
-#        self.assertEqual('/home/ranvir/Documents/file.txt', correct_local_scan_form.data['upload_from_local'])
-#        self.assertFalse(wrong_local_scan_form.is_valid())
-#        self.assertFalse(empty_local_scan_form.is_valid())
