@@ -25,20 +25,27 @@ import json
 import os
 import subprocess
 
-from django.utils import timezone
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+
+from rest_framework.authtoken.models import Token
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
 
 from scanapp.models import Scan
 
-from scanapp.tasks import create_scan_id
 from scanapp.tasks import apply_scan_async
+from scanapp.tasks import create_scan_id
 from scanapp.tasks import scan_code_async
 
 from django.views.decorators.csrf import csrf_exempt
