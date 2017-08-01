@@ -23,6 +23,8 @@
 
 import json
 import os
+import subprocess
+
 from datetime import datetime
 
 from django.core.files.storage import FileSystemStorage
@@ -61,18 +63,20 @@ class LocalUploadView(FormView):
         form = self.form_class(request.POST, request.FILES)
 
         if form.is_valid():
-            f = request.FILES['upload_from_local']
-            fs = FileSystemStorage('media/AnonymousUser/')
-            filename = fs.save(f.name, f)
-
             if (str(request.user) == 'AnonymousUser'):
-                path = 'media/AnonymousUser/' + str(filename)
+                path = 'media/AnonymousUser/'
                 user = None
 
             else:
-                path = 'media/user/' + str(request.user) + '/' + str(filename)
+                path = 'media/user/' + str(request.user) + '/'
                 user = request.user
 
+            subprocess.call(['mkdir', '-p', path])
+            f = request.FILES['upload_from_local']
+            fs = FileSystemStorage(path)
+            filename = fs.save(f.name, f)
+
+            path = path + str(filename)
             scan_directory = filename
             url = fs.url(filename)
             scan_start_time = datetime.now()
@@ -99,7 +103,9 @@ class UrlScanView(FormView):
             else:
                 path = 'media/user/' + str(request.user) + '/url/'
                 user = request.user
+
             scan_start_time = datetime.now()
+            subprocess.call(['mkdir', '-p', path])
 
             # logic to check how many files are already present for the scan
             dir_list = list()
