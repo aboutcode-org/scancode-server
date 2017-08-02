@@ -22,14 +22,18 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 from django.conf.urls import url
+from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
-from rest_framework.authtoken import views as rest_views
 
 from scanapp.views import LocalUploadView
-from scanapp.views import LoginView
-from scanapp.views import RegisterView
 from scanapp.views import ScanResults
 from scanapp.views import UrlScanView
+
+from rest_framework.authtoken import views as rest_views
+from scanapp.views import RegisterView
+from scanapp.views import LoginView
+
+from . import views
 
 urlpatterns = [
 
@@ -41,6 +45,5 @@ urlpatterns = [
     url(r'^signin/', rest_views.obtain_auth_token, name='signin'),
     url(r'^signup/?', RegisterView.as_view(), name='signup'),
     url(r'^home/', TemplateView.as_view(template_name="scanapp/home.html")),
-
 
 ]
