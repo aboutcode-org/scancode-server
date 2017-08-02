@@ -18,7 +18,6 @@ before_script:
   - psql -c "CREATE DATABASE scancode;" -U postgres
 
 script:
-  - python manage.py makemigrations
   - python manage.py migrate
   - python manage.py test
 
