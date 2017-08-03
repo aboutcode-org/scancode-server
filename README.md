@@ -36,7 +36,7 @@ Windows is not tested and not supported for now.
 - Install PosgreSQL 9.5.x of later. (9.6 preferred) 
   On Debian distros use: `sudo apt-get install postgresql-9.5-dev`
 
-- Install extra utilities if needed: `sudo apt-get install wget build-essential`
+- Install extra utilities if needed: `sudo apt-get install wget build-essential redis-server`
 
 
 2. Configure a local test database
@@ -56,12 +56,12 @@ Windows is not tested and not supported for now.
 
 - Create a local virtual environment with `virtualenv .` and activate this with `source bin/activate`
 - Install the required dependencies with `pip install -r requirements.txt`
-- Create the db schema `python manage.py migrate`
+- Create the db schema `python manage.py makemigrations` then `python manage.py migrate`
 - Create a local admin user with `python manage.py createsuperuser`
 - Run a local test server with `python manage.py runserver`
+- Run `redis-server`
+- Run a local celery worker in a separate shell with `celery -A scanapp worker -l info`
 - Fire a browser at http://127.0.0.1:8000/admin/ to access the admin
-- [TODO] Run a local celery worker in a separet shell with `....`
-
 
 
 ### Extras
