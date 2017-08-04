@@ -1,180 +1,128 @@
-from rest_framework import serializers
+#
+# Copyright (c) 2017 nexB Inc. and others. All rights reserved.
+# http://nexb.com and https://github.com/nexB/scancode-server/
+# The scancode-server software is licensed under the Apache License version 2.0.
+# Data generated with scancode-server require an acknowledgment.
+#
+# You may not use this software except in compliance with the License.
+# You may obtain a copy of the License at: http://apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When you publish or redistribute any data created with scancode-server or any scancode-server
+# derivative work, you must accompany this data with the following acknowledgment:
+#
+#  Generated with scancode-server and provided on an "AS IS" BASIS, WITHOUT WARRANTIES
+#  OR CONDITIONS OF ANY KIND, either express or implied. No content created from
+#  scancode-server should be considered or used as legal advice. Consult an Attorney
+#  for any legal advice.
+#  scancode-server is a free software code scanning tool from nexB Inc. and others.
+#  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 from django.contrib.auth.models import User
 
-from scanapp.models import ScanInfo
-from scanapp.models import UserInfo
-from scanapp.models import URLScanInfo
-from scanapp.models import LocalScanInfo
-from scanapp.models import CodeInfo
-from scanapp.models import ScanResult
-from scanapp.models import ScanFileInfo
+from scanapp.models import Scan
+from scanapp.models import ScannedFile
 from scanapp.models import License
-from scanapp.models import MatchedRule
-from scanapp.models import MatchedRuleLicenses
 from scanapp.models import Copyright
-from scanapp.models import CopyrightHolders
-from scanapp.models import CopyrightStatements
+from scanapp.models import CopyrightHolder
+from scanapp.models import CopyrightStatement
 from scanapp.models import CopyrightAuthor
 from scanapp.models import Package
 from scanapp.models import ScanError
 
+from rest_framework import serializers
 
-class ScanInfoSerializer(serializers.ModelSerializer):
+
+class ScanSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `ScanInfo` model with all fields
+    ModelSerializer for `Scan` model with all fields
     """
     class Meta:
-        model = ScanInfo
-        exclude = ('id',)
+        model = Scan
 
 
-class UserSerializer(serializers.ModelSerializer):
+class ScannedFileSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `User` model
+    ModelSerializer for `ScannedFile` with all fields excluding `id` and `scan`
     """
     class Meta:
-        model = User
-        exclude = ('id',)
+        model = ScannedFile
+        exclude = ('id', 'scan')
 
-
-class UserInfoSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `UserInfo` model with all field
-    """
-    user = UserSerializer()
-    class Meta:
-        model = UserInfo
-        exclude = ('id',)
-
-
-class UrlScanInfoSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `URLScanInfo` with all fields
-    """
-    class Meta:
-        model = URLScanInfo
-        exclude = ('id',)
-
-
-class LocalScanInfoSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `LocalScanInfo` with all fields
-    """
-    class Meta:
-        model = LocalScanInfo
-        exclude = ('id',)
-
-class CodeInfoSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `CodeInfo` with all fields
-    """
-    class Meta:
-        model = CodeInfo
-        exclude = ('id',)
-
-class ScanResultSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `ScanResult` with all fields
-    """
-    class Meta:
-        model = ScanResult
-        exclude = ('id',)
-
-class ScanFileInfoSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `ScanFileInfo` with all fields
-    """
-    class Meta:
-        model = ScanFileInfo
-        exclude = ('id',)
 
 class LicenseSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `License` with all fields
+    ModelSerializer for `License` with all fields excluding `id` and `scanned_file`
     """
     class Meta:
         model = License
-        exclude = ('id',)
+        exclude = ('id', 'scanned_file')
 
-class MatchedRuleSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `MatchedRule` with all fields
-    """
-    class Meta:
-        model = MatchedRule
-        exclude = ('id',)
-
-class MatchedRuleLicenseSerializer(serializers.ModelSerializer):
-    """
-    ModelSerializer for `MatchedRuleLicense` with all fields
-    """
-    class Meta:
-        model = MatchedRuleLicenses
-        exclude = ('id',)
 
 class CopyrightSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `Copyright` with all fields
+    ModelSerializer for `Copyright` with all fields excluding `id` and `scanned_file`
     """
     class Meta:
         model = Copyright
-        exclude = ('id',)
+        exclude = ('id', 'scanned_file')
+
 
 class CopyrightHolderSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `CopyrightHolders` with all fields
+    ModelSerializer for `CopyrightHolders` with all fields excluding `id` and `copyright`
     """
     class Meta:
-        model = CopyrightHolders
-        exclude = ('id',)
+        model = CopyrightHolder
+        exclude = ('id', 'copyright')
+
 
 class CopyrightStatementSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `CopyrightHolders` with all fields
+    ModelSerializer for `CopyrightHolders` with all fields excluding `id` and `copyright`
     """
     class Meta:
-        model = CopyrightStatements
-        exclude = ('id',)
+        model = CopyrightStatement
+        exclude = ('id', 'copyright')
+
 
 class CopyrightAuthorSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `CopyrightAuthor` with all fields
+    ModelSerializer for `CopyrightAuthor` with all fields excluding `id` and `copyright`
     """
     class Meta:
         model = CopyrightAuthor
-        exclude = ('id',)
+        exclude = ('id', 'copyright')
+
 
 class PackageSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `Package` with all fields
+    ModelSerializer for `Package` with all fields excluding `id` and `scanned_file`
     """
     class Meta:
         model = Package
-        exclude = ('id',)
+        exclude = ('id', 'scanned_file')
+
 
 class ScanErrorSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `Package` with all fields
+    ModelSerializer for `Package` with all fields excluding `id` and `scanned_file`
     """
     class Meta:
         model = ScanError
-        exclude = ('id',)
+        exclude = ('id', 'scanned_file')
 
 
-# writing good code after so much strugle
-class GodSerializer(serializers.Serializer):
+class AllModelSerializer(serializers.Serializer):
     """
     Another good serializer to handle all the serialization activities
     """
-    code_info = CodeInfoSerializer()
-    url_scan = UrlScanInfoSerializer()
-    local_scan = LocalScanInfoSerializer()
-    scan_result = ScanResultSerializer()
-    scan_file_info = ScanFileInfoSerializer(many=True)
+    scan = ScanSerializer()
+    scanned_file = ScannedFileSerializer(many=True)
     license = LicenseSerializer(many=True)
-    matched_rule = MatchedRuleSerializer(many=True)
-    matched_rule_license = MatchedRuleLicenseSerializer(many=True)
     copyright = CopyrightSerializer(many=True)
     copyright_holder = CopyrightHolderSerializer(many=True)
     copyright_statement = CopyrightStatementSerializer(many=True)
@@ -183,192 +131,14 @@ class GodSerializer(serializers.Serializer):
     scan_error = ScanErrorSerializer(many=True)
 
 
-class GodSerializerHelper(object):
-    def __init__(self, scan_info):
-        self.scan_info = scan_info
-        self.code_info = CodeInfo.objects.get(scan_info=scan_info)
-        self.url_scan = URLScanInfo.objects.get(scan_info=scan_info)
-        self.local_scan = None
-        self.scan_result = ScanResult.objects.get(code_info=self.code_info)
-        self.scan_file_info = ScanFileInfo.objects.filter(scan_result=self.scan_result)
-        self.license = License.objects.filter(scan_file_info__in=(self.scan_file_info))
-        self.matched_rule = MatchedRule.objects.filter(license__in=(self.license))
-        self.matched_rule_license = MatchedRuleLicenses.objects.filter(matched_rule__in=(self.matched_rule))
-        self.copyright = Copyright.objects.filter(scan_file_info__in=(self.scan_file_info))
-        self.copyright_holder = CopyrightHolders.objects.filter(copyright__in=(self.copyright))
-        self.copyright_statement = CopyrightStatements.objects.filter(copyright__in=(self.copyright))
+class AllModelSerializerHelper(object):
+    def __init__(self, scan):
+        self.scan = scan
+        self.scanned_file = ScannedFile.objects.filter(scan=self.scan)
+        self.license = License.objects.filter(scanned_file__in=(self.scanned_file))
+        self.copyright = Copyright.objects.filter(scanned_file__in=(self.scanned_file))
+        self.copyright_holder = CopyrightHolder.objects.filter(copyright__in=(self.copyright))
+        self.copyright_statement = CopyrightStatement.objects.filter(copyright__in=(self.copyright))
         self.copyright_author = CopyrightAuthor.objects.filter(copyright__in=(self.copyright))
-        self.package = Package.objects.filter(scan_file_info__in=(self.scan_file_info))
-        self.scan_error = ScanError.objects.filter(scan_file_info__in=(self.scan_file_info))
-
-s = GodSerializerHelper(ScanInfo.objects.get(pk=51))
-s = GodSerializer(s)
-s.data
-
-### Awesome code ####
-from scanapp.models import ScanInfo
-from scanapp.models import URLScanInfo
-from scanapp.models import LocalScanInfo
-from scanapp.models import CodeInfo
-from rest_framework import serializers
-class CodeScan(object):
-    def __init__(self, code_scan_obj):
-        self.total_code_files = code_scan_obj.total_code_files
-        self.code_size = code_scan_obj.code_size
-
-class LocalScan(object):
-    def __init__(self, local_object, scan_info, code_info):
-        self.scan_info = scan_info
-        self.code_info = code_info
-        self.folder_name = local_object.folder_name
-
-class URLScan(object):
-    def __init__(self, url_object, scan_info, code_info):
-        self.scan_info = scan_info
-        self.code_info = code_info
-        self.url = url_object.URL
-
-class Scan(object):
-    def __init__(self, scan_object):
-        self.scan_type = scan_object.scan_type
-        self.is_complete = scan_object.is_complete
-
-class ScanSerializer(serializers.Serializer):
-    scan_type = serializers.CharField()
-    is_complete = serializers.BooleanField()
-
-class CodeScanSerializer(serializers.Serializer):
-    total_code_files = serializers.IntegerField()
-    code_size = serializers.IntegerField()
-
-class UrlScanSerializer(serializers.Serializer):
-    url = serializers.URLField()
-
-class LocalScanSerializer(serializers.Serializer):
-    folder_name = serializers.CharField()
-
-#a_scan = Scan(ScanInfo.objects.get(pk=36))
-scan_info = ScanInfo.objects.all()
-chromo = list()
-for a_scan in scan_info:
-    b_scan = Scan(a_scan)
-    if(a_scan.scan_type == 'URL'):
-        try:
-            code_info = CodeInfo.objects.get(scan_info=a_scan)
-            url_scan_info = URLScan(URLScanInfo.objects.get(scan_info=a_scan), b_scan, code_info)
-            serializer = UrlScanSerializer(url_scan_info)
-            chromo.append(serializer.data)
-        except:
-            print("Go on don't worry")
-    else:
-        try:
-            code_info = CodeInfo.objects.get(scan_info=a_scan)
-            local_scan_info = LocalScan(LocalScanInfo.objects.get(scan_info=a_scan), a_scan, code_info)
-            serializer = LocalScanSerializer(local_scan_info)
-            chromo.append(serializer.data)
-        except:
-            print("Don't worry")
-
-print(chromo)
-
-
-##### Brilliant code ######
-from scanapp.models import ScanInfo
-from scanapp.models import URLScanInfo
-from scanapp.models import LocalScanInfo
-from scanapp.models import CodeInfo
-from scanapp.models import ScanResult
-from rest_framework import serializers
-
-
-class CodeScan(object):
-    def __init__(self, code_scan_obj):
-        self.total_code_files = code_scan_obj.total_code_files
-        self.code_size = code_scan_obj.code_size
-
-
-class Scan(object):
-    def __init__(self, scan_object, code_info=None, url_scan=None, local_scan=None, scan_result=None):
-        self.scan_type = scan_object.scan_type
-        self.is_complete = scan_object.is_complete
-        self.code_info = code_info
-        self.url_scan = url_scan
-        self.local_scan = local_scan
-        self.scan_result = scan_result
-
-
-#TODO check that after removing these things work or not.
-class URLScan(object):
-    def __init__(self, url_object):
-        self.url = url_object.URL
-
-
-class LocalScan(object):
-    def __init__(self, local_object):
-        self.folder_name = local_object.folder_name
-
-
-class UrlScanSerializer(serializers.Serializer):
-    url = serializers.URLField()
-
-
-class LocalScanSerializer(serializers.Serializer):
-    folder_name = serializers.CharField()
-
-
-class ScanResultSerializer(serializers.Serializer):
-    scanned_json_result = serializers.JSONField()
-    scanned_html_result = serializers.CharField()
-    scancode_notice = serializers.CharField()
-    scancode_version = serializers.CharField()
-    files_count = serializers.IntegerField()
-    total_errors = serializers.IntegerField()
-    scan_time = serializers.IntegerField()
-
-
-class ScanSerializer(serializers.Serializer):
-    scan_type = serializers.CharField()
-    is_complete = serializers.BooleanField()
-    code_info = CodeScanSerializer()
-    url_scan = UrlScanSerializer()
-    local_scan = LocalScanSerializer()
-    scan_result = ScanResultSerializer()
-
-
-scan_info = ScanInfo.objects.all()
-chromo = list()
-for a_scan in scan_info:
-    if(a_scan.scan_type == 'URL'):
-        try:
-            try:
-                code_info = CodeInfo.objects.get(scan_info=a_scan)
-                scan_result = ScanResult.objects.get(code_info=code_info)
-            except:
-                code_info = None
-                scan_result = None
-            url_scan = URLScan(URLScanInfo.objects.get(scan_info=a_scan)) or None
-            local_scan = None
-            scan = Scan(a_scan, code_info, url_scan, local_scan, scan_result)
-            serializer = ScanSerializer(scan)
-            chromo.append(serializer.data)
-        except:
-            pass
-    else:
-        try:
-            try:
-                code_info = CodeInfo.objects.get(scan_info=a_scan)
-                scan_result = ScanResult.objects.get(code_info=code_info) 
-            except:
-                code_info = None
-                scan_result = None
-            local_scan = LocalScanInfo.objects.get(scan_info=a_scan) or None
-            url_scan = None
-            scan = Scan(a_scan, code_info, url_scan, local_scan, scan_result)
-            serializer = ScanSerializer(scan)
-            chromo.append(serializer.data)
-        except:
-            pass
-
-for a in chromo:
-    print a
-
+        self.package = Package.objects.filter(scanned_file__in=(self.scanned_file))
+        self.scan_error = ScanError.objects.filter(scanned_file__in=(self.scanned_file))

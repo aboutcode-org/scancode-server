@@ -28,12 +28,11 @@ from django.views.generic import TemplateView
 from scanapp.views import LocalUploadView
 from scanapp.views import ScanResults
 from scanapp.views import UrlScanView
-
-from rest_framework.authtoken import views as rest_views
 from scanapp.views import RegisterView
 from scanapp.views import LoginView
+from scanapp.views import ScanApiView
 
-from . import views
+from rest_framework.authtoken import views as rest_views
 
 urlpatterns = [
 
@@ -45,6 +44,5 @@ urlpatterns = [
     url(r'^signin/', rest_views.obtain_auth_token, name='signin'),
     url(r'^signup/?', RegisterView.as_view(), name='signup'),
     url(r'^home/', TemplateView.as_view(template_name="scanapp/home.html")),
-    url(r'^products/$', views.ProductList.as_view()),
-    url(r'^api/licenses/$', views.LicenseList.as_view()),
+    url(r'^resultserializer/(?P<pk>[0-9]+)', ScanApiView.as_view()),
 ]

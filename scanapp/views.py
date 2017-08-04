@@ -39,8 +39,6 @@ from scanapp.forms import UrlScanForm
 from scanapp.models import Scan
 
 from scanapp.tasks import create_scan_id
-
-from scanapp.tasks import InsertIntoDB
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import scan_code_async
 
@@ -51,15 +49,11 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
 
-from django.http import HttpResponse
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from scanapp.serializers import MatchedRuleLicenseSerializer
-from scanapp.serializers import PackageSerializer
-from scanapp.serializers import ScanError
+from scanapp.serializers import AllModelSerializer
+from scanapp.serializers import AllModelSerializerHelper
 
 
 class LocalUploadView(FormView):
@@ -175,16 +169,11 @@ class RegisterView(View):
         )
 
 
-#### API views ####
-class LicenseList(APIView):
-    def get(self, request, format=None):
-        licenses = MatchedRuleLicenses.objects.all()
-        serializer = MatchedRuleLicenseSerializer(licenses, many=True)
-        return Response(serializer.data)
-
-
-class PackageList(APIView):
-    def get(self, request, format=None):
-        package = Package.objects.all()
-        serializer = PackageSerializer(licenses, many=True)
-        return Response(serializer.data)
+################## API views ###################
+class ScanApiView(APIView):
+    def get(self, request, format=None, **kwargs):
+        scan_id = kwargs['pk']
+        scan = Scan.objects.get(pk=scan_id)
+        scan_serializer = AllModelSerializerHelper(scan)
+        scan_serializer = AllModelSerializer(scan_serializer)
+        return Response(scan_serializer.data)
