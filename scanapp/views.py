@@ -134,12 +134,16 @@ class ScanResults(TemplateView):
     template_name = 'scanapp/scanresult.html'
 
     def get(self, request, *args, **kwargs):
-        scan = Scan.objects.get(pk=kwargs['pk'])
+        scan_id = kwargs['pk']
+        scan = Scan.objects.get(pk=scan_id)
         result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
         if scan.scan_end_time is not None:
             result = scan
 
-        return render(request, 'scanapp/scanresults.html', context={'result': result})
+        return render(request, 'scanapp/scanresults.html', context={
+            'result': result,
+            'scan_id': scan_id,
+        })
 
 
 class LoginView(TemplateView):
@@ -169,7 +173,7 @@ class RegisterView(View):
         )
 
 
-################## API views ###################
+# API views
 class ScanApiView(APIView):
     def get(self, request, format=None, **kwargs):
         scan_id = kwargs['pk']

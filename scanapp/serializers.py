@@ -42,7 +42,7 @@ class ScanSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Scan
-
+        fields = '__all__'
 
 class ScannedFileSerializer(serializers.ModelSerializer):
     """
