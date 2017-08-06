@@ -44,6 +44,7 @@ class ScanSerializer(serializers.ModelSerializer):
         model = Scan
         fields = '__all__'
 
+
 class ScannedFileSerializer(serializers.ModelSerializer):
     """
     ModelSerializer for `ScannedFile` with all fields excluding `id` and `scan`
