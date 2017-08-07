@@ -280,4 +280,4 @@ class AllModelSerializerTestCase(TestCase):
         key_two = 'scan_end_time'
         del scan_serializer.data['scan'][key_one]
         del scan_serializer.data['scan'][key_two]
-        self.assertEqual(json.loads(scan_serializer_data)['scan'], scan_serializer.data['scan'])
+        self.assertEqual(sorted(json.loads(scan_serializer_data)['scan']), sorted(list(scan_serializer.data['scan'])))
