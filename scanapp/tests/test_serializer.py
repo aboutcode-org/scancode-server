@@ -77,9 +77,9 @@ class AllModelSerializerHelperTestCase(TestCase):
             start_line=800,
             end_line=1000
         )
-        copyright_author = CopyrightAuthor.objects.create(
+        copyright_holder = CopyrightHolder.objects.create(
             copyright=copyright,
-            author='Ranvir Singh'
+            holder='Ranvir Singh'
         )
         copyright_statement = CopyrightStatement.objects.create(
             copyright=copyright,
@@ -213,9 +213,9 @@ class AllModelSerializerTestCase(TestCase):
             start_line=800,
             end_line=1000
         )
-        copyright_author = CopyrightAuthor.objects.create(
+        copyright_holder = CopyrightHolder.objects.create(
             copyright=copyright,
-            author='Ranvir Singh'
+            holder='Ranvir Singh'
         )
         copyright_statement = CopyrightStatement.objects.create(
             copyright=copyright,
@@ -233,5 +233,51 @@ class AllModelSerializerTestCase(TestCase):
 
         scan_serializer_helper = AllModelSerializerHelper(scan)
         scan_serializer = AllModelSerializer(scan_serializer_helper)
-        scan_serializer_data = '{"scan": {"id": 13, "url": "https;//github.com", "scan_directory": "media/username", "scancode_notice": "Some dummy notice", "scancode_version": "2.0.0rc3", "files_count": 200, "scan_start_time": "2017-08-06T23:00:47.960645Z", "scan_end_time": "2017-08-06T23:00:47.960652Z", "user": 12}, "scanned_file": [{"path": "/home/nexb/server/"}], "license": [{"key": "A", "score": 78, "short_name": "mit", "category": "some category", "owner": "mit", "homepage_url": "https://github.com/", "text_url": "http://github.com/", "dejacode_url": "https://github.com", "spdx_license_key": "mit", "spdx_url": "https://github.com/", "start_line": 21, "end_line": 567, "matched_rule": {"url": ["https://github.com", "https://google.com"]}}], "copyright": [{"start_line": 800, "end_line": 1000}], "copyright_holder": [], "copyright_statement": [{"statement": "mit copyright statement"}], "copyright_author": [{"author": "Ranvir Singh"}, {"author": "Ranvir Singh"}], "package": [{"package": "bootstrap"}], "scan_error": [{"scan_error": "Integration Issue"}]}'
-        self.assertEqual(str(scan_serializer_data), str(json.dumps(scan_serializer.data)))
+        scan_serializer_data = """{
+            "scan": {
+                "id": 13,
+                "url": "https;//github.com",
+                "scan_directory": "media/username",
+                "scancode_notice": "Some dummy notice",
+                "scancode_version": "2.0.0rc3",
+                "files_count": 200,
+                "user": 12
+            },
+            "scanned_file": [{
+                "path": "/home/nexb/server/"
+            }],
+            "license": [{
+                "key": "A",
+                "score": 78,
+                "short_name": "mit",
+                "category": "some category",
+                "owner": "mit",
+                "homepage_url": "https://github.com/",
+                "text_url": "http://github.com/",
+                "dejacode_url": "https://github.com",
+                "spdx_license_key": "mit",
+                "spdx_url": "https://github.com/",
+                "start_line": 21, "end_line": 567,
+                "matched_rule": {"url": ["https://github.com", "https://google.com"]}
+            }],
+            "copyright": [{"start_line": 800, "end_line": 1000}],
+            "copyright_holder": [{"holder": "Ranvir Singh"}],
+            "copyright_statement": [{"statement": "mit copyright statement"}],
+            "copyright_author": [{"author": "Ranvir Singh"}],
+            "package": [{"package": "bootstrap"}],
+            "scan_error": [{"scan_error": "Integration Issue"}]
+        }
+        """
+        self.assertEqual(json.loads(scan_serializer_data)['scanned_file'], scan_serializer.data['scanned_file'])
+        self.assertEqual(json.loads(scan_serializer_data)['license'], scan_serializer.data['license'])
+        self.assertEqual(json.loads(scan_serializer_data)['copyright'], scan_serializer.data['copyright'])
+        self.assertEqual(json.loads(scan_serializer_data)['copyright_holder'], scan_serializer.data['copyright_holder'])
+        self.assertEqual(json.loads(scan_serializer_data)['copyright_statement'], scan_serializer.data['copyright_statement'])
+        self.assertEqual(json.loads(scan_serializer_data)['copyright_author'], scan_serializer.data['copyright_author'])
+        self.assertEqual(json.loads(scan_serializer_data)['package'], scan_serializer.data['package'])
+        self.assertEqual(json.loads(scan_serializer_data)['scan_error'], scan_serializer.data['scan_error'])
+        key_one = 'scan_start_time'
+        key_two = 'scan_end_time'
+        del scan_serializer.data['scan'][key_one]
+        del scan_serializer.data['scan'][key_two]
+        self.assertEqual(json.loads(scan_serializer_data)['scan'], scan_serializer.data['scan'])
