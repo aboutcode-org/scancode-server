@@ -30,10 +30,10 @@ import shutil
 import subprocess
 from datetime import datetime
 from os.path import expanduser
-from urlparse import urlparse
 
 import git
 import requests
+from giturl import *
 
 from scanapp.celery import app
 from scanapp.models import Copyright
@@ -237,12 +237,10 @@ def parse_url(URL):
         Parses the URL and checks if it's a git URL. If it is a git URL then the flag is set to 1.
     """
     flag = 0
-    allowed_exts = ('git')
-    url = urlparse(URL)
-    print url
+    g = GitURL(URL)
 
     try:
-        if url.path.rsplit('.', 1)[1] in allowed_exts:
+        if g.is_a('github'):
             flag = 1
     finally:
         return flag

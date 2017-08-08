@@ -37,6 +37,7 @@ from django.shortcuts import render
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from giturl import *
 from rest_framework.authtoken.models import Token
 
 from scanapp.forms import LocalScanForm
@@ -148,6 +149,9 @@ class UrlScanView(FormView):
                 scan_start_time = datetime.now()
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
                 logger.info('git repo detected')
+                gitparser = GitURL(url)
+
+                url = gitparser.to_git()
 
                 scan_code_async_final(url, scan_id)
 
