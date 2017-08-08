@@ -23,6 +23,8 @@
 
 from django.contrib.auth.models import User
 
+from rest_framework import serializers
+
 from scanapp.models import Scan
 from scanapp.models import ScannedFile
 from scanapp.models import License
@@ -33,16 +35,14 @@ from scanapp.models import CopyrightAuthor
 from scanapp.models import Package
 from scanapp.models import ScanError
 
-from rest_framework import serializers
-
 
 class ScanSerializer(serializers.ModelSerializer):
     """
-    ModelSerializer for `Scan` model with all fields
+    ModelSerializer for `Scan` model with all fields excluding `id`
     """
     class Meta:
         model = Scan
-        fields = '__all__'
+        exclude = ('id',)
 
 
 class ScannedFileSerializer(serializers.ModelSerializer):
@@ -119,7 +119,7 @@ class ScanErrorSerializer(serializers.ModelSerializer):
 
 class AllModelSerializer(serializers.Serializer):
     """
-    Another good serializer to handle all the serialization activities
+    A single serializer that takes care of all the Model Serializers and bind them together
     """
     scan = ScanSerializer()
     scanned_file = ScannedFileSerializer(many=True)
@@ -133,6 +133,9 @@ class AllModelSerializer(serializers.Serializer):
 
 
 class AllModelSerializerHelper(object):
+    """
+    Receive Scan Instance as `scan` and creates objects of all the other models
+    """
     def __init__(self, scan):
         self.scan = scan
         self.scanned_file = ScannedFile.objects.filter(scan=self.scan)

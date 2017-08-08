@@ -98,85 +98,72 @@ class AllModelSerializerHelperTestCase(TestCase):
         scan_serializer_helper = AllModelSerializerHelper(scan)
         scan_id = scan.pk
         self.assertEqual(scan_serializer_helper.scan, Scan.objects.get(pk=scan_id))
-        self.assertEqual(
-            str(scan_serializer_helper.scanned_file),
-            str(ScannedFile.objects.filter(scan=Scan.objects.get(pk=scan_id))))
-        self.assertEqual(
-            str(scan_serializer_helper.license),
-            str(
-                License.objects.filter(
-                    scanned_file=ScannedFile.objects.get(
-                        scan=Scan.objects.get(pk=scan_id)
-                    )
-                )
-            )
-        )
-        self.assertEqual(
-            str(scan_serializer_helper.copyright),
-            str(
-                Copyright.objects.filter(
-                    scanned_file=ScannedFile.objects.get(
-                        scan=Scan.objects.get(pk=scan_id)
-                    )
-                )
-            )
-        )
-        self.assertEqual(
-            str(scan_serializer_helper.copyright_holder),
-            str(
-                CopyrightHolder.objects.filter(
-                    copyright=Copyright.objects.filter(
+
+        for serializer_scanned_file, model_scanned_file in zip(scan_serializer_helper.scanned_file, ScannedFile.objects.filter(scan=Scan.objects.get(pk=scan_id))):
+            self.assertEqual(serializer_scanned_file.pk, model_scanned_file.pk)
+
+        licenses = License.objects.filter(
                         scanned_file=ScannedFile.objects.get(
                             scan=Scan.objects.get(pk=scan_id)
                         )
                     )
-                )
-            )
-        )
-        self.assertEqual(
-            str(scan_serializer_helper.copyright_statement),
-            str(
-                CopyrightStatement.objects.filter(
-                    copyright=Copyright.objects.filter(
+        for serializer_license, model_license in zip(scan_serializer_helper.license, licenses):
+            self.assertEqual(serializer_license.pk, model_license.pk)
+
+        copyrights = Copyright.objects.filter(
                         scanned_file=ScannedFile.objects.get(
                             scan=Scan.objects.get(pk=scan_id)
                         )
                     )
-                )
-            )
-        )
-        self.assertEqual(
-            str(scan_serializer_helper.copyright_author),
-            str(
-                CopyrightAuthor.objects.filter(
-                    copyright=Copyright.objects.filter(
+        for serializer_copyright, model_copyright in zip(scan_serializer_helper.copyright, copyrights):
+            self.assertEqual(serializer_copyright.pk, model_copyright.pk)
+
+        copyright_holders = CopyrightHolder.objects.filter(
+                                copyright=Copyright.objects.filter(
+                                    scanned_file=ScannedFile.objects.get(
+                                        scan=Scan.objects.get(pk=scan_id)
+                                    )
+                                )
+                            )
+        for serializer_copyright_holder, model_copyright_holder in zip(scan_serializer_helper.copyright_holder, copyright_holders):
+            self.assertEqual(serializer_copyright_holder.pk, model_copyright_holder.pk)
+
+        copyright_statements = CopyrightStatement.objects.filter(
+                                copyright=Copyright.objects.filter(
+                                    scanned_file=ScannedFile.objects.get(
+                                        scan=Scan.objects.get(pk=scan_id)
+                                    )
+                                )
+                            )
+        for serializer_copyright_statement, model_copyright_statement in zip(scan_serializer_helper.copyright_statement, copyright_statements):
+            self.assertEqual(serializer_copyright_statement.pk, model_copyright_statement.pk)
+
+        copyright_authors = CopyrightAuthor.objects.filter(
+                                copyright=Copyright.objects.filter(
+                                    scanned_file=ScannedFile.objects.get(
+                                        scan=Scan.objects.get(pk=scan_id)
+                                    )
+                                )
+                            )
+        for serializer_copyright_author, model_copyright_author in zip(scan_serializer_helper.copyright_author, copyright_authors):
+            self.assertEqual(serializer_copyright_author.pk, model_copyright_author.pk)
+
+        scan_errors = ScanError.objects.filter(
                         scanned_file=ScannedFile.objects.get(
                             scan=Scan.objects.get(pk=scan_id)
                         )
                     )
-                )
-            )
-        )
-        self.assertEqual(
-            str(scan_serializer_helper.package),
-            str(
-                Package.objects.filter(
-                    scanned_file=ScannedFile.objects.get(
-                        scan=Scan.objects.get(pk=scan_id)
+        for serializer_scan_error, model_scan_error in zip(scan_serializer_helper.scan_error, scan_errors):
+            self.assertEqual(serializer_scan_error.pk, model_scan_error.pk)
+
+        packages = Package.objects.filter(
+                        scanned_file=ScannedFile.objects.get(
+                            scan=Scan.objects.get(pk=scan_id)
+                        )
                     )
-                )
-            )
-        )
-        self.assertEqual(
-            str(scan_serializer_helper.scan_error),
-            str(
-                ScanError.objects.filter(
-                    scanned_file=ScannedFile.objects.get(
-                        scan=Scan.objects.get(pk=scan_id)
-                    )
-                )
-            )
-        )
+        for serializer_package, model_package in zip(scan_serializer_helper.package, packages):
+            self.assertEqual(serializer_package.pk, model_package.pk)
+
 
 class AllModelSerializerTestCase(TestCase):
     def test_all_model_serializer(self):
@@ -233,15 +220,13 @@ class AllModelSerializerTestCase(TestCase):
 
         scan_serializer_helper = AllModelSerializerHelper(scan)
         scan_serializer = AllModelSerializer(scan_serializer_helper)
-        scan_serializer_data = """{
+        all_model_serializer_json = """{
             "scan": {
-                "id": 13,
                 "url": "https;//github.com",
                 "scan_directory": "media/username",
                 "scancode_notice": "Some dummy notice",
                 "scancode_version": "2.0.0rc3",
-                "files_count": 200,
-                "user": 12
+                "files_count": 200
             },
             "scanned_file": [{
                 "path": "/home/nexb/server/"
@@ -268,16 +253,19 @@ class AllModelSerializerTestCase(TestCase):
             "scan_error": [{"scan_error": "Integration Issue"}]
         }
         """
-        self.assertEqual(json.loads(scan_serializer_data)['scanned_file'], scan_serializer.data['scanned_file'])
-        self.assertEqual(json.loads(scan_serializer_data)['license'], scan_serializer.data['license'])
-        self.assertEqual(json.loads(scan_serializer_data)['copyright'], scan_serializer.data['copyright'])
-        self.assertEqual(json.loads(scan_serializer_data)['copyright_holder'], scan_serializer.data['copyright_holder'])
-        self.assertEqual(json.loads(scan_serializer_data)['copyright_statement'], scan_serializer.data['copyright_statement'])
-        self.assertEqual(json.loads(scan_serializer_data)['copyright_author'], scan_serializer.data['copyright_author'])
-        self.assertEqual(json.loads(scan_serializer_data)['package'], scan_serializer.data['package'])
-        self.assertEqual(json.loads(scan_serializer_data)['scan_error'], scan_serializer.data['scan_error'])
+        self.assertEqual(json.loads(all_model_serializer_json)['scanned_file'], scan_serializer.data['scanned_file'])
+        self.assertEqual(json.loads(all_model_serializer_json)['license'], scan_serializer.data['license'])
+        self.assertEqual(json.loads(all_model_serializer_json)['copyright'], scan_serializer.data['copyright'])
+        self.assertEqual(json.loads(all_model_serializer_json)['copyright_holder'], scan_serializer.data['copyright_holder'])
+        self.assertEqual(json.loads(all_model_serializer_json)['copyright_statement'], scan_serializer.data['copyright_statement'])
+        self.assertEqual(json.loads(all_model_serializer_json)['copyright_author'], scan_serializer.data['copyright_author'])
+        self.assertEqual(json.loads(all_model_serializer_json)['package'], scan_serializer.data['package'])
+        self.assertEqual(json.loads(all_model_serializer_json)['scan_error'], scan_serializer.data['scan_error'])
         key_one = 'scan_start_time'
         key_two = 'scan_end_time'
+        key_three = 'user'
         del scan_serializer.data['scan'][key_one]
         del scan_serializer.data['scan'][key_two]
-        self.assertEqual(sorted(json.loads(scan_serializer_data)['scan']), sorted(list(scan_serializer.data['scan'])))
+        del scan_serializer.data['scan'][key_three]
+        for all_model_serializer_json_items, scan_serializer_items in zip(sorted(json.loads(all_model_serializer_json)['scan'].items()), sorted(scan_serializer.data['scan'].items())):
+            self.assertEqual(all_model_serializer_json_items, scan_serializer_items)
