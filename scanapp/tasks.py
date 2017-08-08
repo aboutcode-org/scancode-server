@@ -31,7 +31,6 @@ import subprocess
 from datetime import datetime
 from os.path import expanduser
 
-import git
 import requests
 from giturl import *
 
