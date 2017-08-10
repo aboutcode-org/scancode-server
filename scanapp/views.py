@@ -25,21 +25,27 @@ import json
 import os
 import subprocess
 
-from datetime import datetime
-
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+
+from rest_framework.authtoken.models import Token
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
 
 from scanapp.models import Scan
 
-from scanapp.tasks import create_scan_id
 from scanapp.tasks import apply_scan_async
+from scanapp.tasks import create_scan_id
 from scanapp.tasks import scan_code_async
 
 from django.views.decorators.csrf import csrf_exempt
@@ -85,7 +91,7 @@ class LocalUploadView(FormView):
             path = path + str(filename)
             scan_directory = filename
             url = fs.url(filename)
-            scan_start_time = datetime.now()
+            scan_start_time = timezone.now()
             scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
             apply_scan_async.delay(path, scan_id)
 
@@ -109,8 +115,7 @@ class UrlScanView(FormView):
             else:
                 path = 'media/user/' + str(request.user) + '/url/'
                 user = request.user
-
-            scan_start_time = datetime.now()
+            scan_start_time = timezone.now()
             subprocess.call(['mkdir', '-p', path])
 
             # logic to check how many files are already present for the scan

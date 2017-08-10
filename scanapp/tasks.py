@@ -24,21 +24,21 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
-import subprocess
 import requests
-from datetime import datetime
+import subprocess
 
-from scanapp.models import Scan
-from scanapp.models import ScannedFile
-from scanapp.models import License
-from scanapp.models import Copyright
-from scanapp.models import CopyrightHolder
-from scanapp.models import CopyrightStatement
-from scanapp.models import CopyrightAuthor
-from scanapp.models import Package
-from scanapp.models import ScanError
+from django.utils import timezone
 
 from scanapp.celery import app
+from scanapp.models import Copyright
+from scanapp.models import CopyrightAuthor
+from scanapp.models import CopyrightHolder
+from scanapp.models import CopyrightStatement
+from scanapp.models import License
+from scanapp.models import Package
+from scanapp.models import Scan
+from scanapp.models import ScanError
+from scanapp.models import ScannedFile
 
 
 @app.task
@@ -157,7 +157,7 @@ def save_results_to_db(scan_id, json_data):
             )
             scan_error.save()
 
-    scan.scan_end_time = datetime.now()
+    scan.scan_end_time = timezone.now()
     scan.save()
 
 
