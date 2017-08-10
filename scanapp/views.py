@@ -139,21 +139,32 @@ class UrlScanView(FormView):
             logger = logging.getLogger(__name__)
 
             if parse_url(url) == 1:
-                if (str(request.user) == 'AnonymousUser'):
-                    user = None
-                else:
-                    user = request.user
-                home_path = expanduser("~")
-                clean_url = ''.join(e for e in url if e.isalnum())
-                scan_directory = home_path + '/' + clean_url + '/'
-                scan_start_time = datetime.now()
-                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                logger.info('git repo detected')
+
                 gitparser = GitURL(url)
 
                 url = gitparser.to_git()
 
-                scan_code_async_final(url, scan_id)
+                home_path = expanduser("~")
+                os.chdir(home_path)
+
+                if (str(request.user) == 'AnonymousUser'):
+                    path = 'media/AnonymousUser/url/'
+                    user = None
+                else:
+                    path = 'media/user/' + str(request.user) + '/url/'
+                    user = request.user
+
+                scan_start_time = datetime.now()
+                subprocess.call(['mkdir', '-p', path])
+
+                file_name = ''.join(e for e in url if e.isalnum())
+
+                scan_directory = file_name
+
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                logger.info('git repo detected')
+
+                scan_code_async_final(url, scan_id, path)
 
                 # return the response as HttpResponse
                 return HttpResponseRedirect('/resultscan/' + str(scan_id))

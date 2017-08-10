@@ -31,6 +31,7 @@ import subprocess
 from datetime import datetime
 from os.path import expanduser
 
+import git
 import requests
 from giturl import *
 
@@ -62,21 +63,23 @@ def scan_code_async(url, scan_id, path, file_name):
 
 
 @app.task
-def scan_code_async_final(url, scan_id):
+def scan_code_async_final(url, scan_id, path):
     """
-    Create and save a file at `path` present at `URL` using `scan_id` and bare `path`
-    and apply the scan.
+    Create and initialise the git repository at a certain path and clone the git repo using the 'url'
+    and then get the scan done asynchronously.
     """
     logger = logging.getLogger(__name__)
     logger.info('git repo detected')
 
-    clean_url = ''.join(e for e in url if e.isalnum())
-
-    dir_name = clean_url
-
     home_path = expanduser("~")
-
     os.chdir(home_path)
+
+    os.chdir(path)
+
+    print os.curdir
+
+    clean_url = ''.join(e for e in url if e.isalnum())
+    dir_name = clean_url
 
     if os.path.isdir(dir_name):
         shutil.rmtree(dir_name)
@@ -90,7 +93,7 @@ def scan_code_async_final(url, scan_id):
 
     logger.info('Done ! Remote repository cloned')
 
-    filename = home_path + '/' + clean_url + '/'
+    filename = home_path + '/' + path + dir_name + '/'
 
     path = filename
 
@@ -123,78 +126,72 @@ def save_results_to_db(scan_id, json_data):
         scancode_version=json_data['scancode_version'],
     )
 
-    # logic to calculate total_error
-    #    total_errors = 0
-    #    for a_file in json_data['files']:
-    #        for error in a_file['scan_errors']:
-    #            total_errors = total_errors + 1
-
-    for a_file in json_data['files']:
+    for scanned_file in json_data['files']:
         scanned_file = ScannedFile(
             scan=scan,
-            path=a_file['path']
+            path=scanned_file['path']
         )
         scanned_file.save()
 
-        for a_license in a_file['licenses']:
+        for scanned_license in scanned_file['licenses']:
             license = License(
                 scanned_file=scanned_file,
-                key=a_license['key'],
-                score=a_license['score'],
-                short_name=a_license['short_name'],
-                category=a_license['category'],
-                owner=a_license['owner'],
-                homepage_url=a_license['homepage_url'],
-                text_url=a_license['text_url'],
-                dejacode_url=a_license['dejacode_url'],
-                spdx_license_key=a_license['spdx_license_key'],
-                spdx_url=a_license['spdx_url'],
-                start_line=a_license['start_line'],
-                end_line=a_license['end_line'],
-                matched_rule=a_license['matched_rule']
+                key=scanned_license['key'],
+                score=scanned_license['score'],
+                short_name=scanned_license['short_name'],
+                category=scanned_license['category'],
+                owner=scanned_license['owner'],
+                homepage_url=scanned_license['homepage_url'],
+                text_url=scanned_license['text_url'],
+                dejacode_url=scanned_license['dejacode_url'],
+                spdx_license_key=scanned_license['spdx_license_key'],
+                spdx_url=scanned_license['spdx_url'],
+                start_line=scanned_license['start_line'],
+                end_line=scanned_license['end_line'],
+                matched_rule=scanned_license['matched_rule']
             )
             license.save()
 
-        for a_copyright in a_file['copyrights']:
+        for scanned_copyright in scanned_file['copyrights']:
             copyright = Copyright(
                 scanned_file=scanned_file,
-                start_line=a_copyright['start_line'],
-                end_line=a_copyright['end_line']
+                start_line=scanned_copyright['start_line'],
+                end_line=scanned_copyright['end_line']
             )
             copyright.save()
 
-            for copyright_holder in a_copyright['holders']:
+            for copyright_holder in scanned_copyright['holders']:
                 copyright_holder = CopyrightHolder(
                     copyright=copyright,
                     holder=copyright_holder
                 )
                 copyright_holder.save()
 
-            for copyright_statement in a_copyright['statements']:
+            for copyright_statement in scanned_copyright['statements']:
                 copyright_statement = CopyrightStatement(
                     copyright=copyright,
                     statement=copyright_statement
                 )
                 copyright_statement.save()
 
-            for copyright_author in a_copyright['authors']:
+            for copyright_author in scanned_copyright['authors']:
                 copyright_author = CopyrightAuthor(
                     copyright=copyright,
                     author=copyright_author
                 )
                 copyright_author.save()
 
-        for a_package in a_file['packages']:
+        for scanned_package in scanned_file['packages']:
             package = Package(
                 scanned_file=scanned_file,
-                package=a_package
+                package=scanned_package
             )
             package.save()
 
-        for a_scan_error in a_file['scan_errors']:
+        for scanned_scan_error in scanned_file['scan_errors']:
             scan_error = ScanError(
                 scanned_file=scanned_file,
-                scan_error=a_scan_error
+                scan_error=scanned_scan_error
             )
             scan_error.save()
 
