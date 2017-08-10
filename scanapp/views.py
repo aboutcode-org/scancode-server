@@ -49,6 +49,12 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.views import View
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from scanapp.serializers import AllModelSerializer
+from scanapp.serializers import AllModelSerializerHelper
+
 
 class LocalUploadView(FormView):
     """
@@ -128,12 +134,16 @@ class ScanResults(TemplateView):
     template_name = 'scanapp/scanresult.html'
 
     def get(self, request, *args, **kwargs):
-        scan = Scan.objects.get(pk=kwargs['pk'])
+        scan_id = kwargs['pk']
+        scan = Scan.objects.get(pk=scan_id)
         result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
         if scan.scan_end_time is not None:
             result = scan
 
-        return render(request, 'scanapp/scanresults.html', context={'result': result})
+        return render(request, 'scanapp/scanresults.html', context={
+            'result': result,
+            'scan_id': scan_id,
+        })
 
 
 class LoginView(TemplateView):
@@ -161,3 +171,13 @@ class RegisterView(View):
                 }
             )
         )
+
+
+# API views
+class ScanApiView(APIView):
+    def get(self, request, format=None, **kwargs):
+        scan_id = kwargs['pk']
+        scan = Scan.objects.get(pk=scan_id)
+        scan_serializer = AllModelSerializerHelper(scan)
+        scan_serializer = AllModelSerializer(scan_serializer)
+        return Response(scan_serializer.data)

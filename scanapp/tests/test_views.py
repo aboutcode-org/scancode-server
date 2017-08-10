@@ -123,7 +123,7 @@ class ScanResultViewTestCase(TestCase):
         scan_id = int(scan_id)
         request = RequestFactory().get('/scanresult/')
         response = ScanResults.as_view()(request, pk=scan_id)
-        self.assertEqual('<h3>Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes</h3>\n', response.content)
+        self.assertIn('<h3>Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes</h3>\n', response.content)
 
     def test_scan_result_view_anonymous_user_post_request(self):
         request = RequestFactory().post('/urlscan/', {'url': 'https://github.com/'})
@@ -158,7 +158,7 @@ class ScanResultViewTestCase(TestCase):
         scan_id = int(scan_id)
         request = RequestFactory().get('/scanresult/')
         response = ScanResults.as_view()(request, pk=scan_id)
-        self.assertEqual('<h3>Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes</h3>\n', response.content)
+        self.assertIn('<h3>Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes</h3>\n', response.content)
 
 
 class LoginViewTestCase(TestCase):
