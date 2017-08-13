@@ -76,13 +76,11 @@ def scan_code_async_final(url, scan_id, path):
 
     os.chdir(path)
 
-    print os.curdir
-
     clean_url = ''.join(e for e in url if e.isalnum())
     dir_name = clean_url
 
     if os.path.isdir(dir_name):
-        shutil.rmtree(dir_name)
+        dir_name += str(1)
 
     os.mkdir(dir_name)
 
@@ -93,7 +91,7 @@ def scan_code_async_final(url, scan_id, path):
 
     logger.info('Done ! Remote repository cloned')
 
-    filename = home_path + '/' + path + dir_name + '/'
+    filename = '/'.join([home_path, (''.join([path, dir_name]))])
 
     path = filename
 
@@ -228,15 +226,15 @@ def fill_unfilled_scan_model(scan, files_count, scancode_notice, scancode_versio
     return scan
 
 
-def parse_url(URL):
+def parse_url(url):
     """
         Parses the URL and checks if it's a git URL. If it is a git URL then the flag is set to 1.
     """
-    flag = 0
-    g = GitURL(URL)
+    flag = False
+    g = GitURL(url)
 
     try:
         if g.is_a('github'):
-            flag = 1
+            flag = True
     finally:
         return flag

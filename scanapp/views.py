@@ -21,12 +21,12 @@
 #  scancode-server is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
+from datetime import datetime
 import json
 import logging
 import os
-import subprocess
-from datetime import datetime
 from os.path import expanduser
+import subprocess
 
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
@@ -138,7 +138,7 @@ class UrlScanView(FormView):
 
             logger = logging.getLogger(__name__)
 
-            if parse_url(url) == 1:
+            if parse_url(url):
 
                 gitparser = GitURL(url)
 
@@ -155,7 +155,9 @@ class UrlScanView(FormView):
                     user = request.user
 
                 scan_start_time = datetime.now()
-                subprocess.call(['mkdir', '-p', path])
+
+                if not os.path.exists(path):
+                    os.makedirs(path)
 
                 file_name = ''.join(e for e in url if e.isalnum())
 
@@ -178,7 +180,8 @@ class UrlScanView(FormView):
                     path = 'media/AnonymousUser/url/'
                     user = None
                 else:
-                    path = 'media/user/' + str(request.user) + '/url/'
+
+                    path = '/'.join(['media', 'user', str(request.user), 'url'])
                     user = request.user
 
                 scan_start_time = datetime.now()
@@ -195,7 +198,9 @@ class UrlScanView(FormView):
                     dir_list.sort()
                     file_name = str(1 + int(dir_list[-1]))
 
+                scan_id_string = str(scan_id)
+
                 scan_directory = file_name
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
                 scan_code_async.delay(url, scan_id, path, file_name)
-                return HttpResponseRedirect('/resultscan/' + str(scan_id))
+                return HttpResponseRedirect('/resultscan/' + scan_id_string)
