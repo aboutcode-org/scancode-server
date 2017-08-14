@@ -25,7 +25,6 @@ import json
 import logging
 import os
 import subprocess
-from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
@@ -33,19 +32,38 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+
+from django.utils import timezone
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from giturl import *
 from rest_framework.authtoken.models import Token
 
+from rest_framework.authtoken.models import Token
+
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
 from scanapp.models import Scan
+
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import create_scan_id
 from scanapp.tasks import handle_special_urls
 from scanapp.tasks import scan_code_async
+
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
+from django.http import HttpResponse
+from django.db import transaction
+from django.contrib.auth.models import User
+from django.views import View
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from scanapp.serializers import AllModelSerializer
+from scanapp.serializers import AllModelSerializerHelper
 
 
 class LocalUploadView(FormView):
@@ -77,7 +95,7 @@ class LocalUploadView(FormView):
             path = path + str(filename)
             scan_directory = filename
             url = fs.url(filename)
-            scan_start_time = datetime.now()
+            scan_start_time = timezone.now()
             scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
             apply_scan_async.delay(path, scan_id)
 
@@ -88,12 +106,16 @@ class ScanResults(TemplateView):
     template_name = 'scanapp/scanresult.html'
 
     def get(self, request, *args, **kwargs):
-        scan = Scan.objects.get(pk=kwargs['pk'])
+        scan_id = kwargs['pk']
+        scan = Scan.objects.get(pk=scan_id)
         result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
         if scan.scan_end_time is not None:
             result = scan
 
-        return render(request, 'scanapp/scanresults.html', context={'result': result})
+        return render(request, 'scanapp/scanresults.html', context={
+            'result': result,
+            'scan_id': scan_id,
+        })
 
 
 class LoginView(TemplateView):
@@ -165,3 +187,13 @@ class UrlScanView(FormView):
                 scan_code_async.delay(url, scan_id, path, file_name)
 
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
+
+          
+# API views
+class ScanApiView(APIView):
+    def get(self, request, format=None, **kwargs):
+        scan_id = kwargs['pk']
+        scan = Scan.objects.get(pk=scan_id)
+        scan_serializer = AllModelSerializerHelper(scan)
+        scan_serializer = AllModelSerializer(scan_serializer)
+        return Response(scan_serializer.data)

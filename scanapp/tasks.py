@@ -25,11 +25,11 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-import subprocess
-from datetime import datetime
-
 import requests
+import subprocess
+
 from giturl import *
+from django.utils import timezone
 
 from scanapp.celery import app
 from scanapp.models import Copyright
@@ -167,7 +167,7 @@ def save_results_to_db(scan_id, json_data):
             )
             scan_error.save()
 
-    scan.scan_end_time = datetime.now()
+    scan.scan_end_time = timezone.now()
     scan.save()
 
 
