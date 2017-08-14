@@ -63,39 +63,17 @@ def scan_code_async(url, scan_id, path, file_name):
 
 
 @app.task
-def scan_code_async_final(url, scan_id, path):
+def handle_special_urls(url, scan_id, path, host):
     """
-    Create and initialise the git repository at a certain path and clone the git repo using the 'url'
-    and then get the scan done asynchronously.
+    Create and initialise the git repository at a certain path and clone the git repo using `url`
+    and then get the scan done.
     """
-    logger = logging.getLogger(__name__)
-    logger.info('git repo detected')
-
-    home_path = expanduser("~")
-    os.chdir(home_path)
-
-    os.chdir(path)
-
-    clean_url = ''.join(e for e in url if e.isalnum())
-    dir_name = clean_url
-
-    if os.path.isdir(dir_name):
-        dir_name += str(1)
-
-    os.mkdir(dir_name)
-
-    repo = git.Repo.init(dir_name)
-    origin = repo.create_remote('origin', url)
-    origin.fetch()
-    origin.pull(origin.refs[0].remote_head)
-
-    logger.info('Done ! Remote repository cloned')
-
-    filename = '/'.join([home_path, (''.join([path, dir_name]))])
-
-    path = filename
-
-    apply_scan_async.delay(path, scan_id)
+    if(host == 'github.com'):
+        logger = logging.getLogger(__name__)
+        logger.info('git repo detected')
+        subprocess.call(['git', 'clone', url, path])
+        logger.info('Done ! Remote repository cloned')
+        apply_scan_async(path, scan_id)
 
 
 @app.task
@@ -124,14 +102,14 @@ def save_results_to_db(scan_id, json_data):
         scancode_version=json_data['scancode_version'],
     )
 
-    for scanned_file in json_data['files']:
+    for scan_file in json_data['files']:
         scanned_file = ScannedFile(
             scan=scan,
-            path=scanned_file['path']
+            path=scan_file['path']
         )
         scanned_file.save()
 
-        for scanned_license in scanned_file['licenses']:
+        for scanned_license in scan_file['licenses']:
             license = License(
                 scanned_file=scanned_file,
                 key=scanned_license['key'],
@@ -150,7 +128,7 @@ def save_results_to_db(scan_id, json_data):
             )
             license.save()
 
-        for scanned_copyright in scanned_file['copyrights']:
+        for scanned_copyright in scan_file['copyrights']:
             copyright = Copyright(
                 scanned_file=scanned_file,
                 start_line=scanned_copyright['start_line'],
@@ -158,35 +136,35 @@ def save_results_to_db(scan_id, json_data):
             )
             copyright.save()
 
-            for copyright_holder in scanned_copyright['holders']:
+            for scan_copyright_holder in scanned_copyright['holders']:
                 copyright_holder = CopyrightHolder(
                     copyright=copyright,
-                    holder=copyright_holder
+                    holder=scan_copyright_holder
                 )
                 copyright_holder.save()
 
-            for copyright_statement in scanned_copyright['statements']:
+            for scan_copyright_statement in scanned_copyright['statements']:
                 copyright_statement = CopyrightStatement(
                     copyright=copyright,
-                    statement=copyright_statement
+                    statement=scan_copyright_statement
                 )
                 copyright_statement.save()
 
-            for copyright_author in scanned_copyright['authors']:
+            for scan_copyright_author in scanned_copyright['authors']:
                 copyright_author = CopyrightAuthor(
                     copyright=copyright,
-                    author=copyright_author
+                    author=scan_copyright_author
                 )
                 copyright_author.save()
 
-        for scanned_package in scanned_file['packages']:
+        for scan_package in scan_file['packages']:
             package = Package(
                 scanned_file=scanned_file,
-                package=scanned_package
+                package=scan_package
             )
             package.save()
 
-        for scanned_scan_error in scanned_file['scan_errors']:
+        for scanned_scan_error in scan_file['scan_errors']:
             scan_error = ScanError(
                 scanned_file=scanned_file,
                 scan_error=scanned_scan_error
@@ -224,17 +202,3 @@ def fill_unfilled_scan_model(scan, files_count, scancode_notice, scancode_versio
     scan.scancode_version = scancode_version
     scan.save()
     return scan
-
-
-def parse_url(url):
-    """
-        Parses the URL and checks if it's a git URL. If it is a git URL then the flag is set to 1.
-    """
-    flag = False
-    g = GitURL(url)
-
-    try:
-        if g.is_a('github'):
-            flag = True
-    finally:
-        return flag
