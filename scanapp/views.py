@@ -45,9 +45,8 @@ from scanapp.forms import UrlScanForm
 from scanapp.models import Scan
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import create_scan_id
-from scanapp.tasks import parse_url
+from scanapp.tasks import handle_special_urls
 from scanapp.tasks import scan_code_async
-from scanapp.tasks import scan_code_async_final
 
 
 class LocalUploadView(FormView):
@@ -133,58 +132,29 @@ class UrlScanView(FormView):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            # get the URL from the form
             url = request.POST['url']
-
             logger = logging.getLogger(__name__)
 
-            if parse_url(url):
-
-                gitparser = GitURL(url)
-
-                url = gitparser.to_git()
-
-                home_path = expanduser("~")
-                os.chdir(home_path)
-
-                if (str(request.user) == 'AnonymousUser'):
-                    path = 'media/AnonymousUser/url/'
-                    user = None
-                else:
-                    path = 'media/user/' + str(request.user) + '/url/'
-                    user = request.user
-
-                scan_start_time = datetime.now()
-
-                if not os.path.exists(path):
-                    os.makedirs(path)
-
-                file_name = ''.join(e for e in url if e.isalnum())
-
-                scan_directory = file_name
-
-                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                logger.info('git repo detected')
-
-                scan_code_async_final(url, scan_id, path)
-
-                # return the response as HttpResponse
-                return HttpResponseRedirect('/resultscan/' + str(scan_id))
-
+            if (str(request.user) == 'AnonymousUser'):
+                path = 'media/AnonymousUser/url/'
+                user = None
             else:
+                path = 'media/user/' + str(request.user) + '/url/'
+                user = request.user
 
-                url = request.POST['url']
+            scan_start_time = datetime.now()
+            git_url_parser = GitURL(url)
 
-                # different paths for both anonymous and registered users
-                if (str(request.user) == 'AnonymousUser'):
-                    path = 'media/AnonymousUser/url/'
-                    user = None
-                else:
+            if git_url_parser.host == 'github.com':
+                file_name = git_url_parser.repo
+                scan_directory = file_name
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                path = path + str(scan_id) + '/' + file_name
+                subprocess.call(['mkdir', '-p', path])
 
-                    path = '/'.join(['media', 'user', str(request.user), 'url'])
-                    user = request.user
-
-                scan_start_time = datetime.now()
+                handle_special_urls.delay(url, scan_id, path, git_url_parser.host)
+                logger.info('git repo detected')
+            else:
                 subprocess.call(['mkdir', '-p', path])
 
                 # logic to check how many files are already present for the scan
@@ -198,9 +168,8 @@ class UrlScanView(FormView):
                     dir_list.sort()
                     file_name = str(1 + int(dir_list[-1]))
 
-                scan_id_string = str(scan_id)
-
                 scan_directory = file_name
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
                 scan_code_async.delay(url, scan_id, path, file_name)
-                return HttpResponseRedirect('/resultscan/' + scan_id_string)
+
+            return HttpResponseRedirect('/resultscan/' + str(scan_id))
