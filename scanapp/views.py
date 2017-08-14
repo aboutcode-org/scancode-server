@@ -165,7 +165,7 @@ class UrlScanView(FormView):
 
                 user = request.user
 
-            scan_start_time = datetime.now()
+            scan_start_time = timezone.now()
             git_url_parser = GitURL(url)
 
             if git_url_parser.host == 'github.com':
@@ -188,7 +188,7 @@ class UrlScanView(FormView):
 
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
-          
+
 # API views
 class ScanApiView(APIView):
     def get(self, request, format=None, **kwargs):
