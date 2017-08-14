@@ -157,19 +157,11 @@ class UrlScanView(FormView):
                 handle_special_urls.delay(url, scan_id, path, git_url_parser.host)
                 logger.info('git repo detected')
             else:
-                os.makedirs(path)
-
-                # logic to check how many files are already present for the scan
-                dir_list = os.listdir(path)
-
-                if len(dir_list) == 0:
-                    file_name = '1'
-                else:
-                    dir_list.sort()
-                    file_name = str(1 + int(dir_list[-1]))
-
-                scan_directory = file_name
+                scan_directory = None
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                path = '/'.join([''.join([path, str(scan_id)])])
+                os.makedirs(path)
+                file_name = str(scan_id)
                 scan_code_async.delay(url, scan_id, path, file_name)
 
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
