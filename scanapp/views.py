@@ -21,12 +21,11 @@
 #  scancode-server is a free software code scanning tool from nexB Inc. and others.
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
-from datetime import datetime
 import json
 import logging
 import os
-from os.path import expanduser
 import subprocess
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
@@ -135,11 +134,13 @@ class UrlScanView(FormView):
             url = request.POST['url']
             logger = logging.getLogger(__name__)
 
-            if (str(request.user) == 'AnonymousUser'):
-                path = 'media/AnonymousUser/url/'
+            if str(request.user) == 'AnonymousUser':
+                path = '/'.join(['media', 'AnonymousUser', 'url'])
+
                 user = None
             else:
-                path = 'media/user/' + str(request.user) + '/url/'
+                path = '/'.join(['media', 'user', ''.join([str(request.user), 'url'])])
+
                 user = request.user
 
             scan_start_time = datetime.now()
@@ -149,18 +150,17 @@ class UrlScanView(FormView):
                 file_name = git_url_parser.repo
                 scan_directory = file_name
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                path = path + str(scan_id) + '/' + file_name
-                subprocess.call(['mkdir', '-p', path])
+                path = '/'.join([''.join([path, str(scan_id)]), file_name])
+
+                os.makedirs(path)
 
                 handle_special_urls.delay(url, scan_id, path, git_url_parser.host)
                 logger.info('git repo detected')
             else:
-                subprocess.call(['mkdir', '-p', path])
+                os.makedirs(path)
 
                 # logic to check how many files are already present for the scan
-                dir_list = list()
                 dir_list = os.listdir(path)
-                file_name = ''
 
                 if len(dir_list) == 0:
                     file_name = '1'

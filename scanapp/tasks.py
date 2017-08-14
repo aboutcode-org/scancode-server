@@ -25,13 +25,9 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-import os
-import shutil
 import subprocess
 from datetime import datetime
-from os.path import expanduser
 
-import git
 import requests
 from giturl import *
 
@@ -68,7 +64,7 @@ def handle_special_urls(url, scan_id, path, host):
     Create and initialise the git repository at a certain path and clone the git repo using `url`
     and then get the scan done.
     """
-    if(host == 'github.com'):
+    if host == 'github.com':
         logger = logging.getLogger(__name__)
         logger.info('git repo detected')
         subprocess.call(['git', 'clone', url, path])
