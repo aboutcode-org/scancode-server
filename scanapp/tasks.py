@@ -67,7 +67,7 @@ def handle_special_urls(url, scan_id, path, host):
     and then get the scan done.
     """
     if host == 'github.com':
-        logger.info('git repo detected and cloned form the host github.com¬')
+        logger.info('git repo detected and cloned from the host github.com')
         subprocess.call(['git', 'clone', url, path])
         logger.info('Done ! Remote repository cloned')
         apply_scan_async(path, scan_id)
