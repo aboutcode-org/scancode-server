@@ -142,16 +142,12 @@ class UrlScanView(FormView):
             url = request.POST['url']
             logger = logging.getLogger(__name__)
 
-            user_name = str(request.user)
-
-            if user_name == 'AnonymousUser':
-                path = '/'.join(['media', 'AnonymousUser', 'url'])
-
-                user = None
-            else:
+            if request.user.is_authenticated():
                 path = '/'.join(['media', 'user', ''.join([str(request.user), 'url'])])
-
                 user = request.user
+            else:
+                path = '/'.join(['media', 'AnonymousUser', 'url'])
+                user = None
 
             scan_start_time = timezone.now()
             git_url_parser = GitURL(url)
