@@ -156,7 +156,8 @@ class UrlScanView(FormView):
                 file_name = git_url_parser.repo
                 scan_directory = file_name
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                path = '/'.join([path, '{}'.format(scan_id), file_name])
+                current_scan = Scan.objects.get(pk=scan_id)
+                path = '/'.join([path, '{}'.format(current_scan.pk), file_name])
 
                 os.makedirs(path)
 
@@ -165,12 +166,15 @@ class UrlScanView(FormView):
             else:
                 scan_directory = None
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                path = '/'.join([path, '{}'.format(scan_id)])
+                current_scan = Scan.objects.get(pk=scan_id)
+                path = '/'.join([path, '{}'.format(current_scan.pk)])
+
                 os.makedirs(path)
-                file_name = '{}'.format(scan_id)
+
+                file_name = '{}'.format(current_scan.pk)
                 scan_code_async.delay(url, scan_id, path, file_name)
 
-            return HttpResponseRedirect('/resultscan/' + '{}'.format(scan_id))
+            return HttpResponseRedirect('/resultscan/' + '{}'.format(current_scan.pk))
 
 
 # API views
