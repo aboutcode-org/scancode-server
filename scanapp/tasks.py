@@ -44,6 +44,7 @@ from scanapp.models import ScannedFile
 
 logger = logging.getLogger(__name__)
 
+
 @app.task
 def scan_code_async(url, scan_id, path, file_name):
     """
