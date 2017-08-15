@@ -25,11 +25,11 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-import requests
 import subprocess
 
-from giturl import *
+import requests
 from django.utils import timezone
+from giturl import *
 
 from scanapp.celery import app
 from scanapp.models import Copyright
@@ -42,6 +42,7 @@ from scanapp.models import Scan
 from scanapp.models import ScanError
 from scanapp.models import ScannedFile
 
+logger = logging.getLogger(__name__)
 
 @app.task
 def scan_code_async(url, scan_id, path, file_name):
@@ -65,8 +66,7 @@ def handle_special_urls(url, scan_id, path, host):
     and then get the scan done.
     """
     if host == 'github.com':
-        logger = logging.getLogger(__name__)
-        logger.info('git repo detected')
+        logger.info('git repo detected and cloned form the host github.com¬')
         subprocess.call(['git', 'clone', url, path])
         logger.info('Done ! Remote repository cloned')
         apply_scan_async(path, scan_id)

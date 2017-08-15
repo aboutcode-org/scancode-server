@@ -32,38 +32,24 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
 from django.utils import timezone
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from giturl import *
 from rest_framework.authtoken.models import Token
-
-from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
 from scanapp.models import Scan
-
+from scanapp.serializers import AllModelSerializer
+from scanapp.serializers import AllModelSerializerHelper
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import create_scan_id
 from scanapp.tasks import handle_special_urls
 from scanapp.tasks import scan_code_async
-
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
-from django.http import HttpResponse
-from django.db import transaction
-from django.contrib.auth.models import User
-from django.views import View
-
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from scanapp.serializers import AllModelSerializer
-from scanapp.serializers import AllModelSerializerHelper
 
 
 class LocalUploadView(FormView):
@@ -156,7 +142,9 @@ class UrlScanView(FormView):
             url = request.POST['url']
             logger = logging.getLogger(__name__)
 
-            if str(request.user) == 'AnonymousUser':
+            user_name = str(request.user)
+
+            if user_name == 'AnonymousUser':
                 path = '/'.join(['media', 'AnonymousUser', 'url'])
 
                 user = None
