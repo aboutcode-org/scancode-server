@@ -143,7 +143,7 @@ class UrlScanView(FormView):
             logger = logging.getLogger(__name__)
 
             if request.user.is_authenticated():
-                path = '/'.join(['media', 'user', ''.join([str(request.user), 'url'])])
+                path = '/'.join(['media', 'user', str(request.user), 'url'])
                 user = request.user
             else:
                 path = '/'.join(['media', 'AnonymousUser', 'url'])
@@ -156,7 +156,7 @@ class UrlScanView(FormView):
                 file_name = git_url_parser.repo
                 scan_directory = file_name
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                path = '/'.join([''.join([path, str(scan_id)]), file_name])
+                path = '/'.join([path, str(scan_id), file_name])
 
                 os.makedirs(path)
 
@@ -165,7 +165,7 @@ class UrlScanView(FormView):
             else:
                 scan_directory = None
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-                path = '/'.join([''.join([path, str(scan_id)])])
+                path = '/'.join([path, str(scan_id)])
                 os.makedirs(path)
                 file_name = str(scan_id)
                 scan_code_async.delay(url, scan_id, path, file_name)
