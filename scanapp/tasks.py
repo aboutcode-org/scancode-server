@@ -29,7 +29,6 @@ import subprocess
 
 import requests
 from django.utils import timezone
-from giturl import *
 
 from scanapp.celery import app
 from scanapp.models import Copyright

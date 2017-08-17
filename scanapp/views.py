@@ -36,7 +36,7 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-from giturl import *
+from giturl import GitURL
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
