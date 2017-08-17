@@ -22,6 +22,7 @@
 #  Visit https://github.com/nexB/scancode-server/ for support and download.
 
 import json
+import logging
 import os
 import subprocess
 
@@ -33,33 +34,22 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-
+from giturl import GitURL
 from rest_framework.authtoken.models import Token
-
-from scanapp.forms import LocalScanForm
-from scanapp.forms import UrlScanForm
-
-from scanapp.models import Scan
-
-from scanapp.tasks import apply_scan_async
-from scanapp.tasks import create_scan_id
-from scanapp.tasks import scan_code_async
-
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
-from django.http import HttpResponse
-from django.db import transaction
-from django.contrib.auth.models import User
-from django.views import View
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from scanapp.forms import LocalScanForm
+from scanapp.forms import UrlScanForm
+from scanapp.models import Scan
 from scanapp.serializers import AllModelSerializer
 from scanapp.serializers import AllModelSerializerHelper
+from scanapp.tasks import apply_scan_async
+from scanapp.tasks import create_scan_id
+from scanapp.tasks import handle_special_urls
+from scanapp.tasks import scan_code_async
 
 
 class LocalUploadView(FormView):
@@ -95,43 +85,6 @@ class LocalUploadView(FormView):
             scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
             apply_scan_async.delay(path, scan_id)
 
-            return HttpResponseRedirect('/resultscan/' + str(scan_id))
-
-
-class UrlScanView(FormView):
-    template_name = 'scanapp/urlscan.html'
-    form_class = UrlScanForm
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-
-        if form.is_valid():
-            url = request.POST['url']
-
-            # different paths for both anonymous and registered users
-            if (str(request.user) == 'AnonymousUser'):
-                path = 'media/AnonymousUser/url/'
-                user = None
-            else:
-                path = 'media/user/' + str(request.user) + '/url/'
-                user = request.user
-            scan_start_time = timezone.now()
-            subprocess.call(['mkdir', '-p', path])
-
-            # logic to check how many files are already present for the scan
-            dir_list = list()
-            dir_list = os.listdir(path)
-            file_name = ''
-
-            if len(dir_list) == 0:
-                file_name = '1'
-            else:
-                dir_list.sort()
-                file_name = str(1 + int(dir_list[-1]))
-
-            scan_directory = file_name
-            scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
-            scan_code_async.delay(url, scan_id, path, file_name)
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
 
 
@@ -176,6 +129,52 @@ class RegisterView(View):
                 }
             )
         )
+
+
+class UrlScanView(FormView):
+    template_name = 'scanapp/urlscan.html'
+    form_class = UrlScanForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            url = request.POST['url']
+            logger = logging.getLogger(__name__)
+
+            if request.user.is_authenticated():
+                path = '/'.join(['media', 'user', str(request.user), 'url'])
+                user = request.user
+            else:
+                path = '/'.join(['media', 'AnonymousUser', 'url'])
+                user = None
+
+            scan_start_time = timezone.now()
+            git_url_parser = GitURL(url)
+
+            if git_url_parser.host == 'github.com':
+                file_name = git_url_parser.repo
+                scan_directory = file_name
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                current_scan = Scan.objects.get(pk=scan_id)
+                path = '/'.join([path, '{}'.format(current_scan.pk), file_name])
+
+                os.makedirs(path)
+
+                handle_special_urls.delay(url, scan_id, path, git_url_parser.host)
+                logger.info('git repo detected')
+            else:
+                scan_directory = None
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                current_scan = Scan.objects.get(pk=scan_id)
+                path = '/'.join([path, '{}'.format(current_scan.pk)])
+
+                os.makedirs(path)
+
+                file_name = '{}'.format(current_scan.pk)
+                scan_code_async.delay(url, scan_id, path, file_name)
+
+            return HttpResponseRedirect('/resultscan/' + '{}'.format(current_scan.pk))
 
 
 # API views

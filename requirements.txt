@@ -3,7 +3,8 @@ psycopg2==2.7.1
 djangorestframework==3.6.3
 celery==4.0.2
 redis==2.10.5
-
+giturl.py==0.2.1
+GitPython==2.1.5
 scancode-toolkit==2.0.1
 
 # for testing

@@ -58,8 +58,10 @@ class Scan(models.Model):
         help_text='Url from where the code is fetched'
     )
     scan_directory = models.CharField(
-        max_length=200,
-        help_text='Directory or file in which the code to be scanned is stored'
+        max_length=2000,
+        blank=True,
+        null=True,
+        help_text='Directory in which the code to be scanned is stored'
     )
     scancode_notice = models.CharField(
         max_length=2000,
