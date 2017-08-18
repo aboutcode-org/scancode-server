@@ -51,9 +51,8 @@ class ScanTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        
-        self.assertEqual('2.0.0rc3', scan.scancode_version)
-        self.assertEqual(str(scan.url), str(scan))
+        self.assertEqual('2.0.0rc3', Scan.objects.get(pk=scan.pk).scancode_version)
+        self.assertEqual(str(Scan.objects.get(pk=scan.pk).url), str(scan))
         self.assertEqual('scans', str(scan._meta.verbose_name_plural))
 
 
@@ -72,8 +71,8 @@ class ScannedFileTestCase(TestCase):
         )
         scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
 
-        self.assertEqual('/home/nexb/server/', scanned_file.path)
-        self.assertEqual(scanned_file.path, str(scanned_file))
+        self.assertEqual('/home/nexb/server/', ScannedFile.objects.get(scan=scan).path)
+        self.assertEqual(scanned_file.path, str(ScannedFile.objects.get(scan=scan).path))
         self.assertEqual('scanned files', str(scanned_file._meta.verbose_name_plural))
 
 
@@ -92,7 +91,7 @@ class LicenseTestCase(TestCase):
         )
         scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
         license = License.objects.create(
-            scanned_file=scanned_file, 
+            scanned_file=scanned_file,
             key='A',
             score=78,
             short_name='mit',
@@ -101,14 +100,14 @@ class LicenseTestCase(TestCase):
             homepage_url='https://github.com/',
             text_url='http://github.com/',
             dejacode_url='https://github.com',
-            spdx_license_key='mit', 
+            spdx_license_key='mit',
             spdx_url='https://github.com/',
             start_line=21,
             end_line=567,
             matched_rule=json.loads('{"url": ["https://github.com", "https://google.com"]}')
         )
-        self.assertEqual('mit', license.owner)
-        self.assertEqual(license.key, str(license))
+        self.assertEqual('mit', License.objects.get(scanned_file=scanned_file).owner)
+        self.assertEqual(license.key, str(License.objects.get(scanned_file=scanned_file)))
         self.assertEqual('licenses', license._meta.verbose_name_plural)
 
 
@@ -131,7 +130,7 @@ class CopyrightTestCase(TestCase):
             start_line=800,
             end_line=1000
         )
-        self.assertEqual(1000, copyright.end_line)
+        self.assertEqual(1000, Copyright.objects.get(scanned_file=scanned_file).end_line)
         self.assertEqual(str(copyright.start_line), str(copyright))
         self.assertEqual('copyrights', copyright._meta.verbose_name_plural)
 
@@ -156,8 +155,9 @@ class CopyrightHolderTestCase(TestCase):
             end_line=1000
         )
         copyright_holder = CopyrightHolder.objects.create(copyright=copyright, holder='mit')
-        self.assertEqual('mit', copyright_holder.holder)
-        self.assertEqual(str(copyright_holder.holder), str(copyright_holder))
+
+        self.assertEqual('mit', CopyrightHolder.objects.get(copyright=copyright).holder)
+        self.assertEqual(str(copyright_holder.holder), str(CopyrightHolder.objects.get(copyright=copyright).holder))
         self.assertEqual('copyright holders', copyright_holder._meta.verbose_name_plural)
 
 
@@ -184,8 +184,9 @@ class CopyrightStatementTestCase(TestCase):
             copyright=copyright,
             statement='mit copyright statement'
         )
-        self.assertEqual('mit copyright statement', copyright_statement.statement)
-        self.assertEqual(str(copyright_statement.statement), str(copyright_statement))
+
+        self.assertEqual('mit copyright statement', CopyrightStatement.objects.get(copyright=copyright).statement)
+        self.assertEqual(str(copyright_statement.statement), str(CopyrightStatement.objects.get(copyright=copyright)))
         self.assertEqual('copyright statements', copyright_statement._meta.verbose_name_plural)
 
 
@@ -212,8 +213,9 @@ class CopyrightAuthorTestCase(TestCase):
             copyright=copyright,
             author='Ranvir Singh'
         )
-        self.assertEqual('Ranvir Singh', copyright_author.author)
-        self.assertEqual(str(copyright_author.author), str(copyright_author))
+
+        self.assertEqual('Ranvir Singh', CopyrightAuthor.objects.get(copyright=copyright).author)
+        self.assertEqual(str(copyright_author.author), str(CopyrightAuthor.objects.get(copyright=copyright)))
         self.assertEqual('copyright authors', copyright_author._meta.verbose_name_plural)
 
 
@@ -232,8 +234,9 @@ class PackageTestCase(TestCase):
         )
         scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
         package = Package.objects.create(scanned_file=scanned_file, package='bootstrap')
-        self.assertEqual('bootstrap', package.package)
-        self.assertEqual(str(package.package), str(package))
+
+        self.assertEqual('bootstrap', Package.objects.get(scanned_file=scanned_file).package)
+        self.assertEqual(package.package, str(Package.objects.get(scanned_file=scanned_file)))
         self.assertEqual('packages', package._meta.verbose_name_plural)
 
 
@@ -255,6 +258,6 @@ class ScanErrorTestCase(TestCase):
             scanned_file=scanned_file,
             scan_error='Integration Issue'
         )
-        self.assertEqual('Integration Issue', scan_error.scan_error)
-        self.assertEqual(str(scan_error.scan_error), str(scan_error))
+        self.assertEqual('Integration Issue', ScanError.objects.get(scanned_file=scanned_file).scan_error)
+        self.assertEqual(scan_error.scan_error, str(ScanError.objects.get(scanned_file=scanned_file)))
         self.assertEqual('scan errors', scan_error._meta.verbose_name_plural)
