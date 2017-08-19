@@ -52,8 +52,8 @@ class ScanTestCase(TestCase):
             scan_end_time=timezone.now()
         )
         self.assertEqual('2.0.0rc3', Scan.objects.get(pk=scan.pk).scancode_version)
-        self.assertEqual(str(Scan.objects.get(pk=scan.pk).url), str(scan))
-        self.assertEqual('scans', str(scan._meta.verbose_name_plural))
+        self.assertEqual(scan.url, str(Scan.objects.get(pk=scan.pk)))
+        self.assertEqual('scans', scan._meta.verbose_name_plural)
 
 
 class ScannedFileTestCase(TestCase):
@@ -73,7 +73,7 @@ class ScannedFileTestCase(TestCase):
 
         self.assertEqual('/home/nexb/server/', ScannedFile.objects.get(scan=scan).path)
         self.assertEqual(scanned_file.path, str(ScannedFile.objects.get(scan=scan).path))
-        self.assertEqual('scanned files', str(scanned_file._meta.verbose_name_plural))
+        self.assertEqual('scanned files', scanned_file._meta.verbose_name_plural)
 
 
 class LicenseTestCase(TestCase):
@@ -157,7 +157,7 @@ class CopyrightHolderTestCase(TestCase):
         copyright_holder = CopyrightHolder.objects.create(copyright=copyright, holder='mit')
 
         self.assertEqual('mit', CopyrightHolder.objects.get(copyright=copyright).holder)
-        self.assertEqual(str(copyright_holder.holder), str(CopyrightHolder.objects.get(copyright=copyright).holder))
+        self.assertEqual(copyright_holder.holder, str(CopyrightHolder.objects.get(copyright=copyright).holder))
         self.assertEqual('copyright holders', copyright_holder._meta.verbose_name_plural)
 
 
@@ -186,7 +186,7 @@ class CopyrightStatementTestCase(TestCase):
         )
 
         self.assertEqual('mit copyright statement', CopyrightStatement.objects.get(copyright=copyright).statement)
-        self.assertEqual(str(copyright_statement.statement), str(CopyrightStatement.objects.get(copyright=copyright)))
+        self.assertEqual(copyright_statement.statement, str(CopyrightStatement.objects.get(copyright=copyright)))
         self.assertEqual('copyright statements', copyright_statement._meta.verbose_name_plural)
 
 
@@ -215,7 +215,7 @@ class CopyrightAuthorTestCase(TestCase):
         )
 
         self.assertEqual('Ranvir Singh', CopyrightAuthor.objects.get(copyright=copyright).author)
-        self.assertEqual(str(copyright_author.author), str(CopyrightAuthor.objects.get(copyright=copyright)))
+        self.assertEqual(copyright_author.author, str(CopyrightAuthor.objects.get(copyright=copyright)))
         self.assertEqual('copyright authors', copyright_author._meta.verbose_name_plural)
 
 
