@@ -104,6 +104,80 @@ class ScannedFile(models.Model):
 
     scan = models.ForeignKey(Scan)
     path = models.CharField(max_length=400, help_text='Path of file scanned')
+    type = models.CharField(max_length=400, help_text='Type of the entity being scanned')
+    name = models.CharField(max_length=400, help_text='Name of the entity being scanned')
+    base_name = models.CharField(
+        max_length=400,
+        help_text='Base name of entity without extension',
+    )
+    extension = models.CharField(
+        max_length=400,
+        help_text='Extension of the entity being scanned',
+        null=True,
+        blank=True
+    )
+    date = models.DateTimeField(
+        help_text='Date of entity being created',
+        null=True,
+        blank=True
+    )
+    size = models.IntegerField(help_text='Size of the entity being scanned')
+    sha1 = models.CharField(
+        max_length=400,
+        help_text='SHA1 Checksums of the file',
+        null=True,
+        blank=True
+    )
+    md5 = models.CharField(
+        max_length=400,
+        help_text='MD5 checksums of the file',
+        null=True,
+        blank=True
+    )
+    files_count = models.IntegerField(
+        help_text='number of files present if a directory',
+        null=True,
+        blank=True
+    )
+    mime_type = models.CharField(
+        max_length=400,
+        help_text='mime type of entity being scanned',
+        null=True,
+        blank=True
+    )
+    file_type = models.CharField(
+        max_length=400,
+        help_text='file type of entity being scanned. null if the entity is a directory',
+        null=True,
+        blank=True
+    )
+    programming_language = models.CharField(
+        max_length=400,
+        help_text='programming language used in the entity',
+        null=True,
+        blank=True
+    )
+    is_binary = models.BooleanField(
+        help_text='Whether the entity being scanned is binary or not',
+    )
+    is_text = models.BooleanField(
+        help_text='Whether the entity being scanned has text or not',
+    )
+    is_archive = models.BooleanField(
+        help_text='Whether the entity being scanned is archive or not',
+    )
+    is_media = models.BooleanField(
+        help_text='Whether the entity being scanned is media file or not',
+    )
+    is_source = models.BooleanField(
+        help_text='Whether the entity being scanned is source or not',
+    )
+    is_script = models.BooleanField(
+        help_text='Whether the entity being scanned is a script file or not',
+    )
+    scan_error = JSONField(
+        help_text='Scan Errors'
+    )
 
 
 class License(models.Model):
