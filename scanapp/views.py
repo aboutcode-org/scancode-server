@@ -25,6 +25,7 @@ import json
 import logging
 import os
 import subprocess
+from urlparse import urlparse
 
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
@@ -48,6 +49,7 @@ from scanapp.serializers import AllModelSerializer
 from scanapp.serializers import AllModelSerializerHelper
 from scanapp.tasks import apply_scan_async
 from scanapp.tasks import create_scan_id
+from scanapp.tasks import handle_archive_url
 from scanapp.tasks import handle_special_urls
 from scanapp.tasks import scan_code_async
 
@@ -152,6 +154,19 @@ class UrlScanView(FormView):
             scan_start_time = timezone.now()
             git_url_parser = GitURL(url)
 
+            allowed_exts = ('zip', 'tar', 'tar.gz', 'rar', 'tgz', 'tar.Z', 'tar.bz2',
+                            'tbz2', 'tar.lzma', 'tlz', 'gz')
+            url_parse = urlparse(url)
+
+            is_zip_url = False
+
+            try:
+                for i in allowed_exts:
+                    if url_parse.path.endswith(i):
+                        is_zip_url = True
+            finally:
+                logger.info('smooth work')
+
             if git_url_parser.host == 'github.com':
                 file_name = git_url_parser.repo
                 scan_directory = file_name
@@ -163,6 +178,19 @@ class UrlScanView(FormView):
 
                 handle_special_urls.delay(url, scan_id, path, git_url_parser.host)
                 logger.info('git repo detected')
+
+            elif is_zip_url:
+                logger.info('zip url detected')
+                scan_directory = None
+                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                current_scan = Scan.objects.get(pk=scan_id)
+                path = '/'.join([path, '{}'.format(current_scan.pk)])
+
+                os.makedirs(path)
+
+                file_name = '{}'.format(current_scan.pk)
+                handle_archive_url.delay(url, scan_id, path, file_name)
+
             else:
                 scan_directory = None
                 scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
@@ -174,10 +202,9 @@ class UrlScanView(FormView):
                 file_name = '{}'.format(current_scan.pk)
                 scan_code_async.delay(url, scan_id, path, file_name)
 
-            return HttpResponseRedirect('/resultscan/' + '{}'.format(current_scan.pk))
+            return HttpResponseRedirect('/resultscan/' + '{}'.format(current_scan.pk))  # API views
 
 
-# API views
 class ScanApiView(APIView):
     def get(self, request, format=None, **kwargs):
         scan_id = kwargs['pk']

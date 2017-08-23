@@ -25,9 +25,16 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
+import os
 import subprocess
+import tarfile
+import urllib
+from cStringIO import StringIO
+from urlparse import urlparse
 
+import StringIO
 import requests
+import zipfile
 from django.utils import timezone
 
 from scanapp.celery import app
@@ -56,6 +63,33 @@ def scan_code_async(url, scan_id, path, file_name):
     if r.status_code == 200:
         output_file = open(path, 'w')
         output_file.write(r.text.encode('utf-8'))
+        apply_scan_async.delay(path, scan_id)
+
+
+@app.task
+def handle_archive_url(url, scan_id, path, file_name):
+    """
+    Create and save a file at `path` present at `url` using `scan_id` and bare `path` and
+    `file_name` and apply the scan.
+    """
+    r = requests.get(url)
+    path = path
+    url_parse = urlparse(url)
+    os.chdir(path)
+
+    if r.status_code == 200:
+        if url_parse.path.endswith('zip'):
+            z = zipfile.ZipFile(StringIO.StringIO(r.content))
+            z.extractall()
+
+        else:
+            file_tmp = urllib.urlretrieve(url, filename=None)[0]
+            base_name = os.path.basename(url)
+
+            file_name, file_extension = os.path.splitext(base_name)
+            tar = tarfile.open(file_tmp)
+            tar.extractall(file_name)
+
         apply_scan_async.delay(path, scan_id)
 
 
