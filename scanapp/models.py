@@ -175,9 +175,6 @@ class ScannedFile(models.Model):
     is_script = models.BooleanField(
         help_text='Whether the entity being scanned is a script file or not',
     )
-    scan_error = JSONField(
-        help_text='Scan Errors'
-    )
 
 
 class License(models.Model):

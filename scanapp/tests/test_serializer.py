@@ -55,7 +55,27 @@ class AllModelSerializerHelperTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         license = License.objects.create(
             scanned_file=scanned_file,
             key='A',
@@ -178,7 +198,27 @@ class AllModelSerializerTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type='file',
+            name='celery.py',
+            base_name='celery',
+            extension='.py',
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            files_count=0,
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         license = License.objects.create(
             scanned_file=scanned_file,
             key='A',
@@ -229,7 +269,24 @@ class AllModelSerializerTestCase(TestCase):
                 "files_count": 200
             },
             "scanned_file": [{
-                "path": "/home/nexb/server/"
+                "path": "/home/nexb/server/",
+                "type": "file",
+                "name": "celery.py",
+                "base_name": "celery",
+                "extension": ".py",
+                "size": 1906,
+                "sha1": "2d3c6c804b356a3ef976295fe615e7892dd1e66c",
+                "md5": "1db2f0bc0920084fc0608fab696281ef",
+                "files_count": 0,
+                "mime_type": "text/x-python",
+                "file_type": "Python script, ASCII text executable",
+                "programming_language": "Python",
+                "is_binary": false,
+                "is_text": true,
+                "is_archive": false,
+                "is_media": false,
+                "is_source": true,
+                "is_script": true
             }],
             "license": [{
                 "key": "A",
@@ -242,7 +299,8 @@ class AllModelSerializerTestCase(TestCase):
                 "dejacode_url": "https://github.com",
                 "spdx_license_key": "mit",
                 "spdx_url": "https://github.com/",
-                "start_line": 21, "end_line": 567,
+                "start_line": 21,
+                "end_line": 567,
                 "matched_rule": {"url": ["https://github.com", "https://google.com"]}
             }],
             "copyright": [{"start_line": 800, "end_line": 1000}],

@@ -69,7 +69,27 @@ class ScannedFileTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
 
         self.assertEqual('/home/nexb/server/', ScannedFile.objects.get(scan=scan).path)
         self.assertEqual(scanned_file.path, str(ScannedFile.objects.get(scan=scan).path))
@@ -89,7 +109,27 @@ class LicenseTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         license = License.objects.create(
             scanned_file=scanned_file,
             key='A',
@@ -124,7 +164,27 @@ class CopyrightTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         copyright = Copyright.objects.create(
             scanned_file=scanned_file,
             start_line=800,
@@ -148,7 +208,27 @@ class CopyrightHolderTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         copyright = Copyright.objects.create(
             scanned_file=scanned_file,
             start_line=800,
@@ -174,7 +254,27 @@ class CopyrightStatementTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         copyright = Copyright.objects.create(
             scanned_file=scanned_file,
             start_line=800,
@@ -203,7 +303,27 @@ class CopyrightAuthorTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         copyright = Copyright.objects.create(
             scanned_file=scanned_file,
             start_line=800,
@@ -232,7 +352,27 @@ class PackageTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         package = Package.objects.create(scanned_file=scanned_file, package='bootstrap')
 
         self.assertEqual('bootstrap', Package.objects.get(scanned_file=scanned_file).package)
@@ -253,7 +393,27 @@ class ScanErrorTestCase(TestCase):
             scan_start_time=timezone.now(),
             scan_end_time=timezone.now()
         )
-        scanned_file = ScannedFile.objects.create(scan=scan, path='/home/nexb/server/')
+        scanned_file = ScannedFile.objects.create(
+            scan=scan,
+            path='/home/nexb/server/',
+            type= 'file',
+            name= 'celery.py',
+            base_name= 'celery',
+            extension='.py',
+            date=timezone.now(),
+            size=1906,
+            sha1='2d3c6c804b356a3ef976295fe615e7892dd1e66c',
+            md5='1db2f0bc0920084fc0608fab696281ef',
+            mime_type='text/x-python',
+            file_type='Python script, ASCII text executable',
+            programming_language='Python',
+            is_binary=False,
+            is_text=True,
+            is_archive=False,
+            is_media=False,
+            is_source=True,
+            is_script=True
+        )
         scan_error = ScanError.objects.create(
             scanned_file=scanned_file,
             scan_error='Integration Issue'
