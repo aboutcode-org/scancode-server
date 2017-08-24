@@ -121,7 +121,11 @@ class ScannedFile(models.Model):
         null=True,
         blank=True
     )
-    size = models.IntegerField(help_text='Size of the entity being scanned')
+    size = models.IntegerField(
+        help_text='Size of the entity being scanned',
+        null=True,
+        blank=True
+    )
     sha1 = models.CharField(
         max_length=400,
         help_text='SHA1 Checksums of the file',
@@ -159,21 +163,27 @@ class ScannedFile(models.Model):
     )
     is_binary = models.BooleanField(
         help_text='Whether the entity being scanned is binary or not',
+        default=False
     )
     is_text = models.BooleanField(
         help_text='Whether the entity being scanned has text or not',
+        default=False
     )
     is_archive = models.BooleanField(
         help_text='Whether the entity being scanned is archive or not',
+        default=False
     )
     is_media = models.BooleanField(
         help_text='Whether the entity being scanned is media file or not',
+        default=False
     )
     is_source = models.BooleanField(
         help_text='Whether the entity being scanned is source or not',
+        default=False
     )
     is_script = models.BooleanField(
         help_text='Whether the entity being scanned is a script file or not',
+        default=False
     )
 
 
