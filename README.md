@@ -70,7 +70,7 @@ Windows is not tested and not supported for now.
      - `mkdir -p tmp && cd tmp`
      - `wget https://github.com/pypa/virtualenv/archive/15.1.0.tar.gz`
      - `tar -xf 15.1.0.tar.gz`
-     - `cd ..
+     - `cd ..`
      - `python2 tmp/virtualenv-15.1.0/virtualenv.py .`
      - `source bin/activate`
 
