@@ -33,7 +33,7 @@ Windows is not tested and not supported for now.
 - Get Python 2.7.x installed first and pip (pip is included in the
   Python.org downloads since Python 2.7.9)
 
-- Install PosgreSQL 9.5.x of later. (9.6 preferred) 
+- Install PostgreSQL 9.5.x of later. (9.6 preferred) 
   On Debian distros use: `sudo apt-get install postgresql-9.5-dev`
 
 - Install extra utilities if needed: `sudo apt-get install wget build-essential redis-server`
