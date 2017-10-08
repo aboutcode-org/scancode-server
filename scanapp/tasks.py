@@ -47,7 +47,8 @@ logger = logging.getLogger(__name__)
 @app.task
 def scan_code_async(url, scan_id, path, file_name):
     """
-    Create and save a file at `path` present at `url` using `scan_id` and bare `path` and
+    Create and save a file at `path` present at `url` using
+    `scan_id` and bare `path` and
     `file_name` and apply the scan.
     """
     r = requests.get(url)
@@ -62,7 +63,8 @@ def scan_code_async(url, scan_id, path, file_name):
 @app.task
 def handle_special_urls(url, scan_id, path, host):
     """
-    Create and initialise the git repository at a certain path and clone the git repo using `url`
+    Create and initialise the git repository at a certain path and clone
+     the git repo using `url`
     and then get the scan done.
     """
     if host == 'github.com':
@@ -173,7 +175,8 @@ def save_results_to_db(scan_id, json_data):
 
 def create_scan_id(user, url, scan_directory, scan_start_time):
     """
-    Create the `scan_id` for an applied scan using `user`, `url`, `scan_directory` and
+    Create the `scan_id` for an applied scan using `user`, `url`,
+     `scan_directory` and
     `scan_start_time`
     and returns the `scan_id`.
     """
@@ -188,7 +191,8 @@ def create_scan_id(user, url, scan_directory, scan_start_time):
     return scan_id
 
 
-def fill_unfilled_scan_model(scan, files_count, scancode_notice, scancode_version):
+def fill_unfilled_scan_model(scan, files_count, scancode_notice,
+                             scancode_version):
     """
     Fill the rest of the `Scan` model
     Half of the model is filled by `create_scan_id` method

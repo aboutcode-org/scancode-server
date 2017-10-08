@@ -82,7 +82,8 @@ class LocalUploadView(FormView):
             scan_directory = filename
             url = fs.url(filename)
             scan_start_time = timezone.now()
-            scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+            scan_id = create_scan_id(user, url, scan_directory,
+                                     scan_start_time)
             apply_scan_async.delay(path, scan_id)
 
             return HttpResponseRedirect('/resultscan/' + str(scan_id))
@@ -94,7 +95,8 @@ class ScanResults(TemplateView):
     def get(self, request, *args, **kwargs):
         scan_id = kwargs['pk']
         scan = Scan.objects.get(pk=scan_id)
-        result = 'Please wait... Your tasks are in the queue.\n Reload in 5-10 minutes'
+        result = 'Please wait... Your tasks are in the queue.\n' \
+                 ' Reload in 5-10 minutes'
         if scan.scan_end_time is not None:
             result = scan
 
@@ -110,8 +112,10 @@ class LoginView(TemplateView):
 
 class RegisterView(View):
     def post(self, request):
-        if request.POST.get('password') != request.POST.get('confirm-password'):
-            return HttpResponse("Unauthorized- Password doesn't match", status=401)
+        if request.POST.get('password') != request.POST.get(
+                'confirm-password'):
+            return HttpResponse("Unauthorized- Password doesn't match",
+                                status=401)
 
         with transaction.atomic():
             user = User.objects.create_user(
@@ -155,17 +159,21 @@ class UrlScanView(FormView):
             if git_url_parser.host == 'github.com':
                 file_name = git_url_parser.repo
                 scan_directory = file_name
-                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                scan_id = create_scan_id(user, url, scan_directory,
+                                         scan_start_time)
                 current_scan = Scan.objects.get(pk=scan_id)
-                path = '/'.join([path, '{}'.format(current_scan.pk), file_name])
+                path = '/'.join(
+                    [path, '{}'.format(current_scan.pk), file_name])
 
                 os.makedirs(path)
 
-                handle_special_urls.delay(url, scan_id, path, git_url_parser.host)
+                handle_special_urls.delay(url, scan_id, path,
+                                          git_url_parser.host)
                 logger.info('git repo detected')
             else:
                 scan_directory = None
-                scan_id = create_scan_id(user, url, scan_directory, scan_start_time)
+                scan_id = create_scan_id(user, url, scan_directory,
+                                         scan_start_time)
                 current_scan = Scan.objects.get(pk=scan_id)
                 path = '/'.join([path, '{}'.format(current_scan.pk)])
 
@@ -174,7 +182,8 @@ class UrlScanView(FormView):
                 file_name = '{}'.format(current_scan.pk)
                 scan_code_async.delay(url, scan_id, path, file_name)
 
-            return HttpResponseRedirect('/resultscan/' + '{}'.format(current_scan.pk))
+            return HttpResponseRedirect(
+                '/resultscan/' + '{}'.format(current_scan.pk))
 
 
 # API views

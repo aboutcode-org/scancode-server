@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('scanapp', '0001_initial'),
     ]
@@ -15,6 +14,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='scan',
             name='scan_directory',
-            field=models.CharField(blank=True, help_text='Directory in which the code to be scanned is stored', max_length=2000, null=True),
+            field=models.CharField(blank=True,
+                                   help_text='Directory in whic'
+                                             'h the code to be scanned is stored',
+                                   max_length=2000, null=True),
         ),
     ]

@@ -9,7 +9,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -20,108 +19,190 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Copyright',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_line', models.IntegerField(help_text='Start line of the copyright')),
-                ('end_line', models.IntegerField(help_text='End line of the copyright')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('start_line',
+                 models.IntegerField(help_text='Start line of the copyright')),
+                ('end_line',
+                 models.IntegerField(help_text='End line of the copyright')),
             ],
         ),
         migrations.CreateModel(
             name='CopyrightAuthor',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('author', models.CharField(help_text='Copyright author of the copyright', max_length=200)),
-                ('copyright', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.Copyright')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('author', models.CharField(
+                    help_text='Copyright author of the copyright',
+                    max_length=200)),
+                ('copyright',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                   to='scanapp.Copyright')),
             ],
         ),
         migrations.CreateModel(
             name='CopyrightHolder',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('holder', models.CharField(help_text='Copyright holder of the copyright', max_length=400)),
-                ('copyright', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.Copyright')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('holder', models.CharField(
+                    help_text='Copyright holder of the copyright',
+                    max_length=400)),
+                ('copyright',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                   to='scanapp.Copyright')),
             ],
         ),
         migrations.CreateModel(
             name='CopyrightStatement',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('statement', models.CharField(help_text='Copyright statement of the copyright', max_length=500)),
-                ('copyright', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.Copyright')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('statement', models.CharField(
+                    help_text='Copyright statement of the copyright',
+                    max_length=500)),
+                ('copyright',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                   to='scanapp.Copyright')),
             ],
         ),
         migrations.CreateModel(
             name='License',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key', models.CharField(help_text='Key of license', max_length=200)),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('key',
+                 models.CharField(help_text='Key of license', max_length=200)),
                 ('score', models.IntegerField(help_text='Score of license')),
-                ('short_name', models.CharField(help_text='Short name of the license', max_length=200)),
-                ('category', models.CharField(help_text='Category of license', max_length=1000)),
-                ('owner', models.CharField(help_text='Owner of the license', max_length=500)),
-                ('homepage_url', models.URLField(help_text='Homepage url of license', max_length=2000)),
-                ('text_url', models.URLField(help_text='Text url of license', max_length=2000)),
-                ('dejacode_url', models.URLField(help_text='Dejacode url of detected license', max_length=2000)),
-                ('spdx_license_key', models.CharField(help_text='Spdx license key', max_length=200)),
-                ('spdx_url', models.URLField(help_text='Spdx url of license', max_length=2000)),
-                ('start_line', models.IntegerField(help_text='Start line of license')),
-                ('end_line', models.IntegerField(help_text='End line of license in the file')),
-                ('matched_rule', django.contrib.postgres.fields.jsonb.JSONField(help_text='Matched rule about the license detected')),
+                ('short_name',
+                 models.CharField(help_text='Short name of the license',
+                                  max_length=200)),
+                ('category', models.CharField(help_text='Category of license',
+                                              max_length=1000)),
+                ('owner', models.CharField(help_text='Owner of the license',
+                                           max_length=500)),
+                ('homepage_url',
+                 models.URLField(help_text='Homepage url of license',
+                                 max_length=2000)),
+                ('text_url', models.URLField(help_text='Text url of license',
+                                             max_length=2000)),
+                ('dejacode_url',
+                 models.URLField(help_text='Dejacode url of detected license',
+                                 max_length=2000)),
+                ('spdx_license_key',
+                 models.CharField(help_text='Spdx license key',
+                                  max_length=200)),
+                ('spdx_url', models.URLField(help_text='Spdx url of license',
+                                             max_length=2000)),
+                ('start_line',
+                 models.IntegerField(help_text='Start line of license')),
+                ('end_line', models.IntegerField(
+                    help_text='End line of license in the file')),
+                ('matched_rule',
+                 django.contrib.postgres.fields.jsonb.JSONField(
+                     help_text='Matched rule about the license detected')),
             ],
         ),
         migrations.CreateModel(
             name='Package',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('package', django.contrib.postgres.fields.jsonb.JSONField(help_text='Information of the package', max_length=1000)),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('package', django.contrib.postgres.fields.jsonb.JSONField(
+                    help_text='Information of the package', max_length=1000)),
             ],
         ),
         migrations.CreateModel(
             name='Scan',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField(blank=True, help_text='Url from where the code is fetched', max_length=2000, null=True)),
-                ('scan_directory', models.CharField(blank=True, help_text='Directory in which the code to be scanned is stored', max_length=200, null=True)),
-                ('scancode_notice', models.CharField(blank=True, help_text='Notice by the scancode-toolkit', max_length=2000, null=True)),
-                ('scancode_version', models.CharField(blank=True, help_text='Version of scancode being used', max_length=200, null=True)),
-                ('files_count', models.IntegerField(blank=True, default=0, help_text='Number of files under scan', null=True)),
-                ('scan_start_time', models.DateTimeField(blank=True, help_text='Time at which scan starts', null=True)),
-                ('scan_end_time', models.DateTimeField(blank=True, help_text='Time at which scan ends', null=True)),
-                ('user', models.ForeignKey(blank=True, help_text='Logged in user', null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('url', models.URLField(blank=True,
+                                        help_text='Url from where the '
+                                                  'code is fetched',
+                                        max_length=2000, null=True)),
+                ('scan_directory', models.CharField(blank=True,
+                                                    help_text='Directory in '
+                                                              'which the code to be scanned is stored',
+                                                    max_length=200,
+                                                    null=True)),
+                ('scancode_notice', models.CharField(blank=True,
+                                                     help_text='Notice by the '
+                                                               'scancode-toolkit',
+                                                     max_length=2000,
+                                                     null=True)),
+                ('scancode_version', models.CharField(blank=True,
+                                                      help_text='Version of '
+                                                                'scancode being used',
+                                                      max_length=200,
+                                                      null=True)),
+                ('files_count', models.IntegerField(blank=True, default=0,
+                                                    help_text='Number of f'
+                                                              'iles under scan',
+                                                    null=True)),
+                ('scan_start_time', models.DateTimeField(blank=True,
+                                                         help_text='Time at '
+                                                                   'which scan starts',
+                                                         null=True)),
+                ('scan_end_time', models.DateTimeField(blank=True,
+                                                       help_text='Time at '
+                                                                 'which scan ends',
+                                                       null=True)),
+                ('user',
+                 models.ForeignKey(blank=True, help_text='Logged in user',
+                                   null=True,
+                                   on_delete=django.db.models.deletion.CASCADE,
+                                   to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='ScanError',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('scan_error', models.CharField(help_text='Information about the scan errors', max_length=1000)),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('scan_error', models.CharField(
+                    help_text='Information about the scan errors',
+                    max_length=1000)),
             ],
         ),
         migrations.CreateModel(
             name='ScannedFile',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('path', models.CharField(help_text='Path of file scanned', max_length=400)),
-                ('scan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.Scan')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('path', models.CharField(help_text='Path of file scanned',
+                                          max_length=400)),
+                ('scan',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                   to='scanapp.Scan')),
             ],
         ),
         migrations.AddField(
             model_name='scanerror',
             name='scanned_file',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.ScannedFile'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to='scanapp.ScannedFile'),
         ),
         migrations.AddField(
             model_name='package',
             name='scanned_file',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.ScannedFile'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to='scanapp.ScannedFile'),
         ),
         migrations.AddField(
             model_name='license',
             name='scanned_file',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.ScannedFile'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to='scanapp.ScannedFile'),
         ),
         migrations.AddField(
             model_name='copyright',
             name='scanned_file',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanapp.ScannedFile'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to='scanapp.ScannedFile'),
         ),
     ]
