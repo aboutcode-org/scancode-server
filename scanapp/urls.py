@@ -25,7 +25,7 @@
 
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 from scanapp.views import LocalUploadView
 from scanapp.views import ScanResults
@@ -46,8 +46,10 @@ urlpatterns = [
     url(r'^login/', LoginView.as_view(), name='login'),
     url(r'^signin/', rest_views.obtain_auth_token, name='signin'),
     url(r'^signup/?', RegisterView.as_view(), name='signup'),
+
     url(r'^home/', TemplateView.as_view(template_name='scanapp/home.html'),
         name='home'),
     url(r'^resultserializer/(?P<pk>[0-9]+)', ScanApiView.as_view(),
         name='resultserializer'),
+    url(r'^$', RedirectView.as_view(url='home/')),
 ]
