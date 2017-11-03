@@ -5,7 +5,8 @@ celery==4.0.2
 redis==2.10.5
 giturl.py==0.2.1
 GitPython==2.1.5
-scancode-toolkit==2.0.1
+scancode-toolkit==2.2.1
+requests==2.9.1
 
 # for testing
 pytest
