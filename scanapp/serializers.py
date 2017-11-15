@@ -136,6 +136,7 @@ class AllModelSerializerHelper(object):
     """
     Receive Scan Instance as `scan` and creates objects of all the other models
     """
+
     def __init__(self, scan):
         self.scan = scan
         self.scanned_file = ScannedFile.objects.filter(scan=self.scan)

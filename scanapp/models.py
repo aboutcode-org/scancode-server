@@ -42,6 +42,7 @@ class Scan(models.Model):
     """
     Store various attributes of a scan
     """
+
     def __str__(self):
         return self.url
 
@@ -97,6 +98,7 @@ class ScannedFile(models.Model):
     """
     Store path of every file being scanned
     """
+
     def __str__(self):
         return self.path
 
@@ -108,6 +110,7 @@ class License(models.Model):
     """
     Represent a license as detected in a file
     """
+
     def __str__(self):
         return self.key
 
@@ -131,6 +134,7 @@ class Copyright(models.Model):
     """
     Stores the copyright information present in the code
     """
+
     def __str__(self):
         return str(self.start_line)
 
@@ -143,6 +147,7 @@ class CopyrightHolder(models.Model):
     """
     Stores the information of the copyright holder of the code
     """
+
     def __str__(self):
         return self.holder
 
@@ -154,6 +159,7 @@ class CopyrightStatement(models.Model):
     """
     Stores the information of the copyright statement in the code
     """
+
     def __str__(self):
         return self.statement
 
@@ -165,6 +171,7 @@ class CopyrightAuthor(models.Model):
     """
     Stores the information of the copyright author in the code
     """
+
     def __str__(self):
         return self.author
 
@@ -176,6 +183,7 @@ class Package(models.Model):
     """
     Stores the package imformation present in the code
     """
+
     def __str__(self):
         return str(self.package)
 
@@ -187,6 +195,7 @@ class ScanError(models.Model):
     """
     Stores the errors generated during the scan
     """
+
     def __str__(self):
         return self.scan_error
 

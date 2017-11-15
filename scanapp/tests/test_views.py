@@ -39,7 +39,7 @@ class UrlScanViewTestCase(TestCase):
         request.user = AnonymousUser()
         response = UrlScanView.as_view()(request)
         self.assertEqual(200, response.status_code)
-       
+
     def test_url_scan_view_registered_user_get_request(self):
         user = User.objects.create_user(username='username', password='Password')
         request = RequestFactory().get('/urlscan/')

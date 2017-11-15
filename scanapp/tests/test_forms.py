@@ -28,18 +28,19 @@ from django.test import TestCase
 from scanapp.forms import LocalScanForm
 from scanapp.forms import UrlScanForm
 
+
 class UrlScanFormTestCase(TestCase):
     def test_correct_url_scan_form(self):
         correct_form_data = {'url': 'https://github.com'}
         correct_url_scan_form = UrlScanForm(data=correct_form_data)
         self.assertTrue(correct_url_scan_form.is_valid())
         self.assertEqual('https://github.com', correct_url_scan_form.data['url'])
-    
+
     def test_wrong_url_scan_form(self):
         wrong_form_data = {'url': 'not an URL'}
         wrong_url_scan_form = UrlScanForm(data=wrong_form_data)
-        self.assertFalse(wrong_url_scan_form.is_valid())    
-    
+        self.assertFalse(wrong_url_scan_form.is_valid())
+
     def test_empty_url_scan_form(self):
         empty_form_data = {'url': ''}
         empty_url_scan_form = UrlScanForm(data=empty_form_data)

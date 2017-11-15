@@ -256,9 +256,12 @@ class AllModelSerializerTestCase(TestCase):
         self.assertEqual(json.loads(all_model_serializer_json)['scanned_file'], scan_serializer.data['scanned_file'])
         self.assertEqual(json.loads(all_model_serializer_json)['license'], scan_serializer.data['license'])
         self.assertEqual(json.loads(all_model_serializer_json)['copyright'], scan_serializer.data['copyright'])
-        self.assertEqual(json.loads(all_model_serializer_json)['copyright_holder'], scan_serializer.data['copyright_holder'])
-        self.assertEqual(json.loads(all_model_serializer_json)['copyright_statement'], scan_serializer.data['copyright_statement'])
-        self.assertEqual(json.loads(all_model_serializer_json)['copyright_author'], scan_serializer.data['copyright_author'])
+        self.assertEqual(json.loads(all_model_serializer_json)[
+                         'copyright_holder'], scan_serializer.data['copyright_holder'])
+        self.assertEqual(json.loads(all_model_serializer_json)[
+                         'copyright_statement'], scan_serializer.data['copyright_statement'])
+        self.assertEqual(json.loads(all_model_serializer_json)[
+                         'copyright_author'], scan_serializer.data['copyright_author'])
         self.assertEqual(json.loads(all_model_serializer_json)['package'], scan_serializer.data['package'])
         self.assertEqual(json.loads(all_model_serializer_json)['scan_error'], scan_serializer.data['scan_error'])
         key_one = 'scan_start_time'
