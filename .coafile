@@ -1,0 +1,11 @@
+# For local fixing
+# Use following command after
+# installing coala-bears
+# coala --apply-patches -n
+
+# Python lint
+[pep8]
+files = **/*.py
+ignore = **/migrations/*.*
+bears = PEP8Bear
+max_line_length = 120
