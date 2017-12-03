@@ -330,3 +330,4 @@ class AllModelSerializerTestCase(TestCase):
         del scan_serializer.data['scan'][key_three]
         for all_model_serializer_json_items, scan_serializer_items in zip(sorted(json.loads(all_model_serializer_json)['scan'].items()), sorted(scan_serializer.data['scan'].items())):
             self.assertEqual(all_model_serializer_json_items, scan_serializer_items)
+
