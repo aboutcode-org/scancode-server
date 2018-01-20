@@ -26,11 +26,11 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView, RedirectView
 
 from scanapp.views import LocalUploadView
+from scanapp.views import LoginView
+from scanapp.views import RegisterView
+from scanapp.views import ScanApiView
 from scanapp.views import ScanResults
 from scanapp.views import UrlScanView
-from scanapp.views import RegisterView
-from scanapp.views import LoginView
-from scanapp.views import ScanApiView
 
 from rest_framework.authtoken import views as rest_views
 
