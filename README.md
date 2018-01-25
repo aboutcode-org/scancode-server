@@ -34,9 +34,9 @@ Windows is not tested and not supported for now.
   Python.org downloads since Python 2.7.9)
 
 - Install PostgreSQL 9.5.x of later. (9.6 preferred) 
-  On Debian distros use: `sudo apt-get install postgresql-9.5-dev`
+  On Debian distros use: `sudo apt-get install postgresql-9.5`
 
-- Install extra utilities if needed: `sudo apt-get install wget build-essential redis-server`
+- Install extra utilities if needed: `sudo apt-get install wget build-essential redis-server python-dev`
 
 
 2. Configure a local test database
