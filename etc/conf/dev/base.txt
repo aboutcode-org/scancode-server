@@ -1,0 +1,12 @@
+# Testing
+apipkg
+py
+pytest
+colorama
+execnet
+pytest-xdist
+bumpversion
+coverage
+pytest-cov
+codecov
+xmltodict
