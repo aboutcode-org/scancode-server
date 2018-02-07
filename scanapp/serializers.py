@@ -25,15 +25,15 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 
-from scanapp.models import Scan
-from scanapp.models import ScannedFile
-from scanapp.models import License
 from scanapp.models import Copyright
+from scanapp.models import CopyrightAuthor
 from scanapp.models import CopyrightHolder
 from scanapp.models import CopyrightStatement
-from scanapp.models import CopyrightAuthor
+from scanapp.models import License
 from scanapp.models import Package
+from scanapp.models import Scan
 from scanapp.models import ScanError
+from scanapp.models import ScannedFile
 
 
 class ScanSerializer(serializers.ModelSerializer):
