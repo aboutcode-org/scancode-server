@@ -1,14 +1,11 @@
 {% extends 'scanapp/base.html' %}
 {% load staticfiles %}
+
+{% block head_content %}
+    <link rel="stylesheet" href="{% static "css/home.css" %}">
+{% endblock %}
+
 {% block content %}
-
-<head>
- <link rel="stylesheet" href="{% static "css/home.css" %}">
-</head>
-
-<body>
-
-
 <header class="projects">
     <h1 class="projects-title">Scancode</h1>
 
@@ -51,5 +48,4 @@
 <div class="about">
     <a href="#" class="about-link">About scancode</a>
 </div>
-
 {% endblock %}
