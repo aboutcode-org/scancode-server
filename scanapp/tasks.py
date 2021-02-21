@@ -47,8 +47,8 @@ logger = logging.getLogger(__name__)
 @app.task
 def scan_code_async(url, scan_id, path, file_name):
     """
-    Create and save a file at `path` present at `url` using `scan_id` and bare `path` and
-    `file_name` and apply the scan.
+    Create and save a file at `path` present at `url` using `scan_id`, bare `path`, `file_name`
+    and apply the scan.
     """
     r = requests.get(url)
     path = path + file_name
@@ -81,14 +81,14 @@ def apply_scan_async(path, scan_id):
     # FIXME improve error checking when calling scan in subprocess.
     scan_result = subprocess.check_output(['scancode', path])
     json_data = json.loads(scan_result)
-    save_results_to_db.delay(scan_id, json_data)
+    save_results_to_db.delay(scan_id, json_data, path)
 
 
 @app.task
-def save_results_to_db(scan_id, json_data):
+def save_results_to_db(scan_id, json_data, path):
     """
     Fill database using `json_data` for given `scan_id`
-    and add `end_scan_time` to true.
+    and call `fill_rest_scanned_file_model` with the `path`
     """
     scan = Scan.objects.get(pk=scan_id)
     scan = fill_unfilled_scan_model(
@@ -167,6 +167,38 @@ def save_results_to_db(scan_id, json_data):
             )
             scan_error.save()
 
+    fill_rest_scanned_file_model.delay(path, scan_id)
+
+
+@app.task
+def fill_rest_scanned_file_model(path, scan_id):
+    """
+    Fill the rest ScannedFile model by using another subprocess call
+    """
+    scanned_file_results = subprocess.check_output(['scancode', '--info', '-f', 'json-pp', path])
+    json_scanned_file_results = json.loads(scanned_file_results)
+    for file in json_scanned_file_results['files']:
+        scanned_file = ScannedFile.objects.get(path=file['path'])
+        scanned_file.type = file['type']
+        scanned_file.name = file['name']
+        scanned_file.base_name = file['base_name']
+        scanned_file.extension = file['extension']
+        scanned_file.date = file['date']
+        scanned_file.size = file['size']
+        scanned_file.sha1 = file['sha1']
+        scanned_file.md5 = file['md5']
+        scanned_file.files_count = file['files_count']
+        scanned_file.mime_type = file['mime_type']
+        scanned_file.file_type = file['file_type']
+        scanned_file.programming_language = file['programming_language']
+        scanned_file.is_binary = file['is_binary']
+        scanned_file.is_text = file['is_text']
+        scanned_file.is_archive = file['is_archive']
+        scanned_file.is_media = file['is_media']
+        scanned_file.is_source = file['is_source']
+        scanned_file.is_script = file['is_script']
+        scanned_file.save()
+    scan = Scan.objects.get(pk=scan_id)
     scan.scan_end_time = timezone.now()
     scan.save()
 
